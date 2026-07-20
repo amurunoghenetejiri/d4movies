@@ -33,7 +33,7 @@ export const Route = createFileRoute("/movie/$id")({
 });
 
 function Details() {
-  const m = Route.useLoaderData();
+  const m = Route.useLoaderData() as import("@/lib/movies").Movie;
   const related = movies.filter((x) => x.id !== m.id && (x.category === m.category || x.genres.some((g) => m.genres.includes(g)))).slice(0, 14);
   const recommended = movies.filter((x) => x.id !== m.id).slice(20, 34);
 
