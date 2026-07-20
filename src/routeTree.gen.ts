@@ -9,38 +9,448 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WatchlistRouteImport } from './routes/watchlist'
+import { Route as TvSeriesRouteImport } from './routes/tv-series'
+import { Route as TrendingRouteImport } from './routes/trending'
+import { Route as TopRatedRouteImport } from './routes/top-rated'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as NollywoodRouteImport } from './routes/nollywood'
+import { Route as MoviesRouteImport } from './routes/movies'
+import { Route as LatestRouteImport } from './routes/latest'
+import { Route as KoreanDramaRouteImport } from './routes/korean-drama'
+import { Route as HollywoodRouteImport } from './routes/hollywood'
+import { Route as HistoryRouteImport } from './routes/history'
+import { Route as GenresRouteImport } from './routes/genres'
+import { Route as FavoritesRouteImport } from './routes/favorites'
+import { Route as DownloadsRouteImport } from './routes/downloads'
+import { Route as CountriesRouteImport } from './routes/countries'
+import { Route as ComingSoonRouteImport } from './routes/coming-soon'
+import { Route as ChineseDramaRouteImport } from './routes/chinese-drama'
+import { Route as BollywoodRouteImport } from './routes/bollywood'
+import { Route as AnimeRouteImport } from './routes/anime'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as WatchIdRouteImport } from './routes/watch.$id'
+import { Route as MovieIdRouteImport } from './routes/movie.$id'
 
+const WatchlistRoute = WatchlistRouteImport.update({
+  id: '/watchlist',
+  path: '/watchlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TvSeriesRoute = TvSeriesRouteImport.update({
+  id: '/tv-series',
+  path: '/tv-series',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrendingRoute = TrendingRouteImport.update({
+  id: '/trending',
+  path: '/trending',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TopRatedRoute = TopRatedRouteImport.update({
+  id: '/top-rated',
+  path: '/top-rated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NollywoodRoute = NollywoodRouteImport.update({
+  id: '/nollywood',
+  path: '/nollywood',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoviesRoute = MoviesRouteImport.update({
+  id: '/movies',
+  path: '/movies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LatestRoute = LatestRouteImport.update({
+  id: '/latest',
+  path: '/latest',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KoreanDramaRoute = KoreanDramaRouteImport.update({
+  id: '/korean-drama',
+  path: '/korean-drama',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HollywoodRoute = HollywoodRouteImport.update({
+  id: '/hollywood',
+  path: '/hollywood',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoryRoute = HistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GenresRoute = GenresRouteImport.update({
+  id: '/genres',
+  path: '/genres',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FavoritesRoute = FavoritesRouteImport.update({
+  id: '/favorites',
+  path: '/favorites',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DownloadsRoute = DownloadsRouteImport.update({
+  id: '/downloads',
+  path: '/downloads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CountriesRoute = CountriesRouteImport.update({
+  id: '/countries',
+  path: '/countries',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComingSoonRoute = ComingSoonRouteImport.update({
+  id: '/coming-soon',
+  path: '/coming-soon',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChineseDramaRoute = ChineseDramaRouteImport.update({
+  id: '/chinese-drama',
+  path: '/chinese-drama',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BollywoodRoute = BollywoodRouteImport.update({
+  id: '/bollywood',
+  path: '/bollywood',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnimeRoute = AnimeRouteImport.update({
+  id: '/anime',
+  path: '/anime',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WatchIdRoute = WatchIdRouteImport.update({
+  id: '/watch/$id',
+  path: '/watch/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MovieIdRoute = MovieIdRouteImport.update({
+  id: '/movie/$id',
+  path: '/movie/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/anime': typeof AnimeRoute
+  '/bollywood': typeof BollywoodRoute
+  '/chinese-drama': typeof ChineseDramaRoute
+  '/coming-soon': typeof ComingSoonRoute
+  '/countries': typeof CountriesRoute
+  '/downloads': typeof DownloadsRoute
+  '/favorites': typeof FavoritesRoute
+  '/genres': typeof GenresRoute
+  '/history': typeof HistoryRoute
+  '/hollywood': typeof HollywoodRoute
+  '/korean-drama': typeof KoreanDramaRoute
+  '/latest': typeof LatestRoute
+  '/movies': typeof MoviesRoute
+  '/nollywood': typeof NollywoodRoute
+  '/search': typeof SearchRoute
+  '/top-rated': typeof TopRatedRoute
+  '/trending': typeof TrendingRoute
+  '/tv-series': typeof TvSeriesRoute
+  '/watchlist': typeof WatchlistRoute
+  '/movie/$id': typeof MovieIdRoute
+  '/watch/$id': typeof WatchIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/anime': typeof AnimeRoute
+  '/bollywood': typeof BollywoodRoute
+  '/chinese-drama': typeof ChineseDramaRoute
+  '/coming-soon': typeof ComingSoonRoute
+  '/countries': typeof CountriesRoute
+  '/downloads': typeof DownloadsRoute
+  '/favorites': typeof FavoritesRoute
+  '/genres': typeof GenresRoute
+  '/history': typeof HistoryRoute
+  '/hollywood': typeof HollywoodRoute
+  '/korean-drama': typeof KoreanDramaRoute
+  '/latest': typeof LatestRoute
+  '/movies': typeof MoviesRoute
+  '/nollywood': typeof NollywoodRoute
+  '/search': typeof SearchRoute
+  '/top-rated': typeof TopRatedRoute
+  '/trending': typeof TrendingRoute
+  '/tv-series': typeof TvSeriesRoute
+  '/watchlist': typeof WatchlistRoute
+  '/movie/$id': typeof MovieIdRoute
+  '/watch/$id': typeof WatchIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/anime': typeof AnimeRoute
+  '/bollywood': typeof BollywoodRoute
+  '/chinese-drama': typeof ChineseDramaRoute
+  '/coming-soon': typeof ComingSoonRoute
+  '/countries': typeof CountriesRoute
+  '/downloads': typeof DownloadsRoute
+  '/favorites': typeof FavoritesRoute
+  '/genres': typeof GenresRoute
+  '/history': typeof HistoryRoute
+  '/hollywood': typeof HollywoodRoute
+  '/korean-drama': typeof KoreanDramaRoute
+  '/latest': typeof LatestRoute
+  '/movies': typeof MoviesRoute
+  '/nollywood': typeof NollywoodRoute
+  '/search': typeof SearchRoute
+  '/top-rated': typeof TopRatedRoute
+  '/trending': typeof TrendingRoute
+  '/tv-series': typeof TvSeriesRoute
+  '/watchlist': typeof WatchlistRoute
+  '/movie/$id': typeof MovieIdRoute
+  '/watch/$id': typeof WatchIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/anime'
+    | '/bollywood'
+    | '/chinese-drama'
+    | '/coming-soon'
+    | '/countries'
+    | '/downloads'
+    | '/favorites'
+    | '/genres'
+    | '/history'
+    | '/hollywood'
+    | '/korean-drama'
+    | '/latest'
+    | '/movies'
+    | '/nollywood'
+    | '/search'
+    | '/top-rated'
+    | '/trending'
+    | '/tv-series'
+    | '/watchlist'
+    | '/movie/$id'
+    | '/watch/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/anime'
+    | '/bollywood'
+    | '/chinese-drama'
+    | '/coming-soon'
+    | '/countries'
+    | '/downloads'
+    | '/favorites'
+    | '/genres'
+    | '/history'
+    | '/hollywood'
+    | '/korean-drama'
+    | '/latest'
+    | '/movies'
+    | '/nollywood'
+    | '/search'
+    | '/top-rated'
+    | '/trending'
+    | '/tv-series'
+    | '/watchlist'
+    | '/movie/$id'
+    | '/watch/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/anime'
+    | '/bollywood'
+    | '/chinese-drama'
+    | '/coming-soon'
+    | '/countries'
+    | '/downloads'
+    | '/favorites'
+    | '/genres'
+    | '/history'
+    | '/hollywood'
+    | '/korean-drama'
+    | '/latest'
+    | '/movies'
+    | '/nollywood'
+    | '/search'
+    | '/top-rated'
+    | '/trending'
+    | '/tv-series'
+    | '/watchlist'
+    | '/movie/$id'
+    | '/watch/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AnimeRoute: typeof AnimeRoute
+  BollywoodRoute: typeof BollywoodRoute
+  ChineseDramaRoute: typeof ChineseDramaRoute
+  ComingSoonRoute: typeof ComingSoonRoute
+  CountriesRoute: typeof CountriesRoute
+  DownloadsRoute: typeof DownloadsRoute
+  FavoritesRoute: typeof FavoritesRoute
+  GenresRoute: typeof GenresRoute
+  HistoryRoute: typeof HistoryRoute
+  HollywoodRoute: typeof HollywoodRoute
+  KoreanDramaRoute: typeof KoreanDramaRoute
+  LatestRoute: typeof LatestRoute
+  MoviesRoute: typeof MoviesRoute
+  NollywoodRoute: typeof NollywoodRoute
+  SearchRoute: typeof SearchRoute
+  TopRatedRoute: typeof TopRatedRoute
+  TrendingRoute: typeof TrendingRoute
+  TvSeriesRoute: typeof TvSeriesRoute
+  WatchlistRoute: typeof WatchlistRoute
+  MovieIdRoute: typeof MovieIdRoute
+  WatchIdRoute: typeof WatchIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/watchlist': {
+      id: '/watchlist'
+      path: '/watchlist'
+      fullPath: '/watchlist'
+      preLoaderRoute: typeof WatchlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tv-series': {
+      id: '/tv-series'
+      path: '/tv-series'
+      fullPath: '/tv-series'
+      preLoaderRoute: typeof TvSeriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trending': {
+      id: '/trending'
+      path: '/trending'
+      fullPath: '/trending'
+      preLoaderRoute: typeof TrendingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/top-rated': {
+      id: '/top-rated'
+      path: '/top-rated'
+      fullPath: '/top-rated'
+      preLoaderRoute: typeof TopRatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nollywood': {
+      id: '/nollywood'
+      path: '/nollywood'
+      fullPath: '/nollywood'
+      preLoaderRoute: typeof NollywoodRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/movies': {
+      id: '/movies'
+      path: '/movies'
+      fullPath: '/movies'
+      preLoaderRoute: typeof MoviesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/latest': {
+      id: '/latest'
+      path: '/latest'
+      fullPath: '/latest'
+      preLoaderRoute: typeof LatestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/korean-drama': {
+      id: '/korean-drama'
+      path: '/korean-drama'
+      fullPath: '/korean-drama'
+      preLoaderRoute: typeof KoreanDramaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hollywood': {
+      id: '/hollywood'
+      path: '/hollywood'
+      fullPath: '/hollywood'
+      preLoaderRoute: typeof HollywoodRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/history': {
+      id: '/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof HistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/genres': {
+      id: '/genres'
+      path: '/genres'
+      fullPath: '/genres'
+      preLoaderRoute: typeof GenresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/favorites': {
+      id: '/favorites'
+      path: '/favorites'
+      fullPath: '/favorites'
+      preLoaderRoute: typeof FavoritesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/downloads': {
+      id: '/downloads'
+      path: '/downloads'
+      fullPath: '/downloads'
+      preLoaderRoute: typeof DownloadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/countries': {
+      id: '/countries'
+      path: '/countries'
+      fullPath: '/countries'
+      preLoaderRoute: typeof CountriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coming-soon': {
+      id: '/coming-soon'
+      path: '/coming-soon'
+      fullPath: '/coming-soon'
+      preLoaderRoute: typeof ComingSoonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chinese-drama': {
+      id: '/chinese-drama'
+      path: '/chinese-drama'
+      fullPath: '/chinese-drama'
+      preLoaderRoute: typeof ChineseDramaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bollywood': {
+      id: '/bollywood'
+      path: '/bollywood'
+      fullPath: '/bollywood'
+      preLoaderRoute: typeof BollywoodRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/anime': {
+      id: '/anime'
+      path: '/anime'
+      fullPath: '/anime'
+      preLoaderRoute: typeof AnimeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +458,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/watch/$id': {
+      id: '/watch/$id'
+      path: '/watch/$id'
+      fullPath: '/watch/$id'
+      preLoaderRoute: typeof WatchIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/movie/$id': {
+      id: '/movie/$id'
+      path: '/movie/$id'
+      fullPath: '/movie/$id'
+      preLoaderRoute: typeof MovieIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AnimeRoute: AnimeRoute,
+  BollywoodRoute: BollywoodRoute,
+  ChineseDramaRoute: ChineseDramaRoute,
+  ComingSoonRoute: ComingSoonRoute,
+  CountriesRoute: CountriesRoute,
+  DownloadsRoute: DownloadsRoute,
+  FavoritesRoute: FavoritesRoute,
+  GenresRoute: GenresRoute,
+  HistoryRoute: HistoryRoute,
+  HollywoodRoute: HollywoodRoute,
+  KoreanDramaRoute: KoreanDramaRoute,
+  LatestRoute: LatestRoute,
+  MoviesRoute: MoviesRoute,
+  NollywoodRoute: NollywoodRoute,
+  SearchRoute: SearchRoute,
+  TopRatedRoute: TopRatedRoute,
+  TrendingRoute: TrendingRoute,
+  TvSeriesRoute: TvSeriesRoute,
+  WatchlistRoute: WatchlistRoute,
+  MovieIdRoute: MovieIdRoute,
+  WatchIdRoute: WatchIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
