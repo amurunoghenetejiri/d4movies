@@ -13,21 +13,34 @@ import { Route as WatchlistRouteImport } from './routes/watchlist'
 import { Route as TvSeriesRouteImport } from './routes/tv-series'
 import { Route as TrendingRouteImport } from './routes/trending'
 import { Route as TopRatedRouteImport } from './routes/top-rated'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SupportRouteImport } from './routes/support'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as NollywoodRouteImport } from './routes/nollywood'
 import { Route as MoviesRouteImport } from './routes/movies'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as LatestRouteImport } from './routes/latest'
 import { Route as KoreanDramaRouteImport } from './routes/korean-drama'
 import { Route as HollywoodRouteImport } from './routes/hollywood'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as GenresRouteImport } from './routes/genres'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FavoritesRouteImport } from './routes/favorites'
+import { Route as FaqRouteImport } from './routes/faq'
 import { Route as DownloadsRouteImport } from './routes/downloads'
+import { Route as DmcaRouteImport } from './routes/dmca'
 import { Route as CountriesRouteImport } from './routes/countries'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ComingSoonRouteImport } from './routes/coming-soon'
 import { Route as ChineseDramaRouteImport } from './routes/chinese-drama'
 import { Route as BollywoodRouteImport } from './routes/bollywood'
 import { Route as AnimeRouteImport } from './routes/anime'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WatchIdRouteImport } from './routes/watch.$id'
 import { Route as MovieIdRouteImport } from './routes/movie.$id'
@@ -52,9 +65,44 @@ const TopRatedRoute = TopRatedRouteImport.update({
   path: '/top-rated',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NollywoodRoute = NollywoodRouteImport.update({
@@ -65,6 +113,11 @@ const NollywoodRoute = NollywoodRouteImport.update({
 const MoviesRoute = MoviesRouteImport.update({
   id: '/movies',
   path: '/movies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LatestRoute = LatestRouteImport.update({
@@ -92,9 +145,19 @@ const GenresRoute = GenresRouteImport.update({
   path: '/genres',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FavoritesRoute = FavoritesRouteImport.update({
   id: '/favorites',
   path: '/favorites',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DownloadsRoute = DownloadsRouteImport.update({
@@ -102,9 +165,19 @@ const DownloadsRoute = DownloadsRouteImport.update({
   path: '/downloads',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DmcaRoute = DmcaRouteImport.update({
+  id: '/dmca',
+  path: '/dmca',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CountriesRoute = CountriesRouteImport.update({
   id: '/countries',
   path: '/countries',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComingSoonRoute = ComingSoonRouteImport.update({
@@ -127,6 +200,11 @@ const AnimeRoute = AnimeRouteImport.update({
   path: '/anime',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -145,21 +223,34 @@ const MovieIdRoute = MovieIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/anime': typeof AnimeRoute
   '/bollywood': typeof BollywoodRoute
   '/chinese-drama': typeof ChineseDramaRoute
   '/coming-soon': typeof ComingSoonRoute
+  '/contact': typeof ContactRoute
   '/countries': typeof CountriesRoute
+  '/dmca': typeof DmcaRoute
   '/downloads': typeof DownloadsRoute
+  '/faq': typeof FaqRoute
   '/favorites': typeof FavoritesRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/genres': typeof GenresRoute
   '/history': typeof HistoryRoute
   '/hollywood': typeof HollywoodRoute
   '/korean-drama': typeof KoreanDramaRoute
   '/latest': typeof LatestRoute
+  '/login': typeof LoginRoute
   '/movies': typeof MoviesRoute
   '/nollywood': typeof NollywoodRoute
+  '/privacy': typeof PrivacyRoute
+  '/profile': typeof ProfileRoute
+  '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
+  '/settings': typeof SettingsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/support': typeof SupportRoute
+  '/terms': typeof TermsRoute
   '/top-rated': typeof TopRatedRoute
   '/trending': typeof TrendingRoute
   '/tv-series': typeof TvSeriesRoute
@@ -169,21 +260,34 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/anime': typeof AnimeRoute
   '/bollywood': typeof BollywoodRoute
   '/chinese-drama': typeof ChineseDramaRoute
   '/coming-soon': typeof ComingSoonRoute
+  '/contact': typeof ContactRoute
   '/countries': typeof CountriesRoute
+  '/dmca': typeof DmcaRoute
   '/downloads': typeof DownloadsRoute
+  '/faq': typeof FaqRoute
   '/favorites': typeof FavoritesRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/genres': typeof GenresRoute
   '/history': typeof HistoryRoute
   '/hollywood': typeof HollywoodRoute
   '/korean-drama': typeof KoreanDramaRoute
   '/latest': typeof LatestRoute
+  '/login': typeof LoginRoute
   '/movies': typeof MoviesRoute
   '/nollywood': typeof NollywoodRoute
+  '/privacy': typeof PrivacyRoute
+  '/profile': typeof ProfileRoute
+  '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
+  '/settings': typeof SettingsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/support': typeof SupportRoute
+  '/terms': typeof TermsRoute
   '/top-rated': typeof TopRatedRoute
   '/trending': typeof TrendingRoute
   '/tv-series': typeof TvSeriesRoute
@@ -194,21 +298,34 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/anime': typeof AnimeRoute
   '/bollywood': typeof BollywoodRoute
   '/chinese-drama': typeof ChineseDramaRoute
   '/coming-soon': typeof ComingSoonRoute
+  '/contact': typeof ContactRoute
   '/countries': typeof CountriesRoute
+  '/dmca': typeof DmcaRoute
   '/downloads': typeof DownloadsRoute
+  '/faq': typeof FaqRoute
   '/favorites': typeof FavoritesRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/genres': typeof GenresRoute
   '/history': typeof HistoryRoute
   '/hollywood': typeof HollywoodRoute
   '/korean-drama': typeof KoreanDramaRoute
   '/latest': typeof LatestRoute
+  '/login': typeof LoginRoute
   '/movies': typeof MoviesRoute
   '/nollywood': typeof NollywoodRoute
+  '/privacy': typeof PrivacyRoute
+  '/profile': typeof ProfileRoute
+  '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
+  '/settings': typeof SettingsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/support': typeof SupportRoute
+  '/terms': typeof TermsRoute
   '/top-rated': typeof TopRatedRoute
   '/trending': typeof TrendingRoute
   '/tv-series': typeof TvSeriesRoute
@@ -220,21 +337,34 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/anime'
     | '/bollywood'
     | '/chinese-drama'
     | '/coming-soon'
+    | '/contact'
     | '/countries'
+    | '/dmca'
     | '/downloads'
+    | '/faq'
     | '/favorites'
+    | '/forgot-password'
     | '/genres'
     | '/history'
     | '/hollywood'
     | '/korean-drama'
     | '/latest'
+    | '/login'
     | '/movies'
     | '/nollywood'
+    | '/privacy'
+    | '/profile'
+    | '/register'
     | '/search'
+    | '/settings'
+    | '/sitemap.xml'
+    | '/support'
+    | '/terms'
     | '/top-rated'
     | '/trending'
     | '/tv-series'
@@ -244,21 +374,34 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/anime'
     | '/bollywood'
     | '/chinese-drama'
     | '/coming-soon'
+    | '/contact'
     | '/countries'
+    | '/dmca'
     | '/downloads'
+    | '/faq'
     | '/favorites'
+    | '/forgot-password'
     | '/genres'
     | '/history'
     | '/hollywood'
     | '/korean-drama'
     | '/latest'
+    | '/login'
     | '/movies'
     | '/nollywood'
+    | '/privacy'
+    | '/profile'
+    | '/register'
     | '/search'
+    | '/settings'
+    | '/sitemap.xml'
+    | '/support'
+    | '/terms'
     | '/top-rated'
     | '/trending'
     | '/tv-series'
@@ -268,21 +411,34 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/anime'
     | '/bollywood'
     | '/chinese-drama'
     | '/coming-soon'
+    | '/contact'
     | '/countries'
+    | '/dmca'
     | '/downloads'
+    | '/faq'
     | '/favorites'
+    | '/forgot-password'
     | '/genres'
     | '/history'
     | '/hollywood'
     | '/korean-drama'
     | '/latest'
+    | '/login'
     | '/movies'
     | '/nollywood'
+    | '/privacy'
+    | '/profile'
+    | '/register'
     | '/search'
+    | '/settings'
+    | '/sitemap.xml'
+    | '/support'
+    | '/terms'
     | '/top-rated'
     | '/trending'
     | '/tv-series'
@@ -293,21 +449,34 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   AnimeRoute: typeof AnimeRoute
   BollywoodRoute: typeof BollywoodRoute
   ChineseDramaRoute: typeof ChineseDramaRoute
   ComingSoonRoute: typeof ComingSoonRoute
+  ContactRoute: typeof ContactRoute
   CountriesRoute: typeof CountriesRoute
+  DmcaRoute: typeof DmcaRoute
   DownloadsRoute: typeof DownloadsRoute
+  FaqRoute: typeof FaqRoute
   FavoritesRoute: typeof FavoritesRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   GenresRoute: typeof GenresRoute
   HistoryRoute: typeof HistoryRoute
   HollywoodRoute: typeof HollywoodRoute
   KoreanDramaRoute: typeof KoreanDramaRoute
   LatestRoute: typeof LatestRoute
+  LoginRoute: typeof LoginRoute
   MoviesRoute: typeof MoviesRoute
   NollywoodRoute: typeof NollywoodRoute
+  PrivacyRoute: typeof PrivacyRoute
+  ProfileRoute: typeof ProfileRoute
+  RegisterRoute: typeof RegisterRoute
   SearchRoute: typeof SearchRoute
+  SettingsRoute: typeof SettingsRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  SupportRoute: typeof SupportRoute
+  TermsRoute: typeof TermsRoute
   TopRatedRoute: typeof TopRatedRoute
   TrendingRoute: typeof TrendingRoute
   TvSeriesRoute: typeof TvSeriesRoute
@@ -346,11 +515,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TopRatedRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/search': {
       id: '/search'
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/nollywood': {
@@ -365,6 +583,13 @@ declare module '@tanstack/react-router' {
       path: '/movies'
       fullPath: '/movies'
       preLoaderRoute: typeof MoviesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/latest': {
@@ -402,11 +627,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GenresRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/favorites': {
       id: '/favorites'
       path: '/favorites'
       fullPath: '/favorites'
       preLoaderRoute: typeof FavoritesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/downloads': {
@@ -416,11 +655,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DownloadsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dmca': {
+      id: '/dmca'
+      path: '/dmca'
+      fullPath: '/dmca'
+      preLoaderRoute: typeof DmcaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/countries': {
       id: '/countries'
       path: '/countries'
       fullPath: '/countries'
       preLoaderRoute: typeof CountriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/coming-soon': {
@@ -451,6 +704,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnimeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -477,21 +737,34 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   AnimeRoute: AnimeRoute,
   BollywoodRoute: BollywoodRoute,
   ChineseDramaRoute: ChineseDramaRoute,
   ComingSoonRoute: ComingSoonRoute,
+  ContactRoute: ContactRoute,
   CountriesRoute: CountriesRoute,
+  DmcaRoute: DmcaRoute,
   DownloadsRoute: DownloadsRoute,
+  FaqRoute: FaqRoute,
   FavoritesRoute: FavoritesRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   GenresRoute: GenresRoute,
   HistoryRoute: HistoryRoute,
   HollywoodRoute: HollywoodRoute,
   KoreanDramaRoute: KoreanDramaRoute,
   LatestRoute: LatestRoute,
+  LoginRoute: LoginRoute,
   MoviesRoute: MoviesRoute,
   NollywoodRoute: NollywoodRoute,
+  PrivacyRoute: PrivacyRoute,
+  ProfileRoute: ProfileRoute,
+  RegisterRoute: RegisterRoute,
   SearchRoute: SearchRoute,
+  SettingsRoute: SettingsRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
+  SupportRoute: SupportRoute,
+  TermsRoute: TermsRoute,
   TopRatedRoute: TopRatedRoute,
   TrendingRoute: TrendingRoute,
   TvSeriesRoute: TvSeriesRoute,

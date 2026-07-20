@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { Logo } from "@/components/brand/Logo";
 import type { ReactNode } from "react";
 
@@ -31,4 +31,4 @@ export function AuthLayout({ title, subtitle, children, foot }: { title: string;
   );
 }
 
-export const Route = createFileRoute("/_auth-layout")({ component: () => null });
+
