@@ -21,7 +21,7 @@ export const Route = createFileRoute("/movie/$id")({
       links: [{ rel: "canonical", href: `/movie/${params.id}` }],
     };
   },
-  loader: ({ params }) => {
+  loader: ({ params }): import("@/lib/movies").Movie => {
     const m = findMovie(params.id);
     if (!m) throw notFound();
     return m;

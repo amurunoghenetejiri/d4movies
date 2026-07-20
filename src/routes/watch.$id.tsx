@@ -14,7 +14,7 @@ export const Route = createFileRoute("/watch/$id")({
     const m = findMovie(params.id);
     return { meta: [{ title: `Watch ${m?.title ?? "Movie"} — D4TECH Movies` }, { name: "robots", content: "noindex" }] };
   },
-  loader: ({ params }) => {
+  loader: ({ params }): import("@/lib/movies").Movie => {
     const m = findMovie(params.id);
     if (!m) throw notFound();
     return m;
