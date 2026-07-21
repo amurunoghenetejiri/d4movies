@@ -4,7 +4,7 @@ import { z } from "zod";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { MovieGrid } from "@/components/movies/MovieGrid";
-import { allCountries, allGenres, movies } from "@/lib/movies";
+import { useAllMovies, useCountries, useGenres } from "@/lib/movies";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search as SearchIcon } from "lucide-react";
@@ -19,6 +19,9 @@ export const Route = createFileRoute("/search")({
 
 function SearchPage() {
   const { q } = Route.useSearch();
+  const all = useAllMovies();
+  const genres = useGenres();
+  const countries = useCountries();
   const [query, setQuery] = useState(q ?? "");
   const [genre, setGenre] = useState<string | null>(null);
   const [country, setCountry] = useState<string | null>(null);
@@ -30,7 +33,7 @@ function SearchPage() {
 
   const results = useMemo(() => {
     const t = query.trim().toLowerCase();
-    return movies.filter((m) => {
+    return all.filter((m) => {
       if (t) {
         const hit = m.title.toLowerCase().includes(t) ||
           m.description.toLowerCase().includes(t) ||
@@ -46,9 +49,9 @@ function SearchPage() {
       if (quality && m.quality !== quality) return false;
       return true;
     });
-  }, [query, genre, country, year, minRating, quality]);
+  }, [all, query, genre, country, year, minRating, quality]);
 
-  const years = Array.from(new Set(movies.map((m) => m.year))).sort((a, b) => b - a);
+  const years = Array.from(new Set(all.map((m) => m.year))).sort((a, b) => b - a);
 
   return (
     <AppShell>
@@ -67,8 +70,8 @@ function SearchPage() {
         </div>
 
         <div className="grid gap-3 md:grid-cols-5">
-          <Filter label="Genre" value={genre} setValue={setGenre} options={allGenres} />
-          <Filter label="Country" value={country} setValue={setCountry} options={allCountries} />
+          <Filter label="Genre" value={genre} setValue={setGenre} options={genres} />
+          <Filter label="Country" value={country} setValue={setCountry} options={countries} />
           <Filter label="Year" value={year} setValue={setYear} options={years.map(String)} />
           <Filter label="Quality" value={quality} setValue={setQuality} options={["4K", "FHD", "HD"]} />
           <div className="glass rounded-xl p-3">

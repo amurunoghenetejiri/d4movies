@@ -14,6 +14,8 @@ import logoAsset from "@/assets/d4tech-logo.png.asset.json";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { SplashScreen } from "@/components/brand/SplashScreen";
+import { AuthProvider } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
   return (
@@ -120,6 +122,7 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
   const [splash, setSplash] = useState(true);
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -129,11 +132,24 @@ function RootComponent() {
     }
     sessionStorage.setItem("d4tech-splash-seen", "1");
   }, []);
+
+  useEffect(() => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") {
+        router.invalidate();
+        if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
+      }
+    });
+    return () => sub.subscription.unsubscribe();
+  }, [router, queryClient]);
+
   return (
     <QueryClientProvider client={queryClient}>
-      {splash && <SplashScreen onDone={() => setSplash(false)} />}
-      <Outlet />
-      <Toaster position="top-right" theme="dark" richColors />
+      <AuthProvider>
+        {splash && <SplashScreen onDone={() => setSplash(false)} />}
+        <Outlet />
+        <Toaster position="top-right" theme="dark" richColors />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

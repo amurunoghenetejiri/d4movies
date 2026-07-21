@@ -1,43 +1,142 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({ meta: [{ title: "Settings — D4TECH Movies" }] }),
-  component: Settings,
+  component: SettingsPage,
 });
 
-function Settings() {
-  const [state, setState] = useState({
+function SettingsPage() {
+  const { user, profile, loading, refreshProfile } = useAuth();
+  const nav = useNavigate();
+  const [prefs, setPrefs] = useState({
     darkMode: true, autoPlay: true, notifications: true, subtitles: true, hd: true, privacy: false, twoFA: false,
   });
-  const T = (k: keyof typeof state) => (v: boolean) => { setState((s) => ({ ...s, [k]: v })); toast(`Updated ${k}`); };
+  const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
+  const [phone, setPhone] = useState("");
+  const [saving, setSaving] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = localStorage.getItem("d4tech-prefs");
+    if (saved) try { setPrefs(JSON.parse(saved)); } catch {}
+  }, []);
+  useEffect(() => {
+    if (profile) {
+      setFullName(profile.full_name ?? "");
+      setUsername(profile.username ?? "");
+      setPhone(profile.phone ?? "");
+    }
+  }, [profile]);
+
+  const savePref = (k: keyof typeof prefs) => (v: boolean) => {
+    setPrefs((s) => {
+      const next = { ...s, [k]: v };
+      localStorage.setItem("d4tech-prefs", JSON.stringify(next));
+      return next;
+    });
+    toast(`Updated`);
+  };
+
+  const saveProfile = async () => {
+    if (!user) return;
+    setSaving(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ full_name: fullName, username, phone })
+      .eq("id", user.id);
+    setSaving(false);
+    if (error) { toast.error(error.message); return; }
+    await refreshProfile();
+    toast.success("Profile saved");
+  };
+
+  const uploadAvatar = async (file: File) => {
+    if (!user) return;
+    const ext = file.name.split(".").pop();
+    const path = `${user.id}/avatar.${ext}`;
+    const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
+    if (error) { toast.error(error.message); return; }
+    const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+    await supabase.from("profiles").update({ avatar_url: data.publicUrl }).eq("id", user.id);
+    await refreshProfile();
+    toast.success("Avatar updated");
+  };
+
+  const deleteAccount = async () => {
+    if (!user) return;
+    if (!window.confirm("This will sign you out and delete your local session. Proceed?")) return;
+    await supabase.auth.signOut();
+    toast("Signed out. Contact support to fully delete your account.");
+    nav({ to: "/" });
+  };
+
+  if (!loading && !user) {
+    return (
+      <AppShell>
+        <PageHeader kicker="Account" title="Settings" subtitle="Sign in to manage your account." />
+        <div className="text-center py-8">
+          <Button asChild className="rounded-full glow-emerald"><Link to="/login">Sign in</Link></Button>
+        </div>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>
       <PageHeader kicker="Account" title="Settings" subtitle="Fine-tune your D4TECH experience." />
       <div className="mx-auto max-w-3xl px-4 md:px-6 space-y-4">
+        <Section title="Profile">
+          <div className="px-5 py-4 space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="size-16 rounded-full bg-gradient-to-br from-primary to-gold grid place-items-center overflow-hidden">
+                {profile?.avatar_url
+                  ? <img src={profile.avatar_url} alt="" className="size-full object-cover" />
+                  : <span className="text-2xl font-bold text-primary-foreground">{(fullName || user?.email || "D4")[0]?.toUpperCase()}</span>}
+              </div>
+              <div>
+                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && uploadAvatar(e.target.files[0])} />
+                <Button variant="outline" className="rounded-full" onClick={() => fileRef.current?.click()}>Change avatar</Button>
+              </div>
+            </div>
+            <div><Label>Full name</Label><Input className="mt-1" value={fullName} onChange={(e) => setFullName(e.target.value)} /></div>
+            <div><Label>Username</Label><Input className="mt-1" value={username} onChange={(e) => setUsername(e.target.value)} /></div>
+            <div><Label>Phone</Label><Input className="mt-1" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Optional" /></div>
+            <Button className="rounded-full" onClick={saveProfile} disabled={saving}>{saving ? "Saving..." : "Save profile"}</Button>
+          </div>
+        </Section>
+
         <Section title="Playback">
-          <Row label="Auto Play next episode" v={state.autoPlay} on={T("autoPlay")} />
-          <Row label="Prefer HD/4K quality" v={state.hd} on={T("hd")} />
-          <Row label="Subtitles on by default" v={state.subtitles} on={T("subtitles")} />
-          <SelectRow label="Playback quality" options={["Auto", "4K", "FHD", "HD", "SD"]} />
-          <SelectRow label="Preferred language" options={["English", "Spanish", "French", "Hindi", "Korean", "Japanese", "Mandarin"]} />
+          <Row label="Auto Play next episode" v={prefs.autoPlay} on={savePref("autoPlay")} />
+          <Row label="Prefer HD/4K quality" v={prefs.hd} on={savePref("hd")} />
+          <Row label="Subtitles on by default" v={prefs.subtitles} on={savePref("subtitles")} />
         </Section>
+
         <Section title="Appearance">
-          <Row label="Dark mode" v={state.darkMode} on={T("darkMode")} />
-          <SelectRow label="Interface language" options={["English", "Français", "Español", "日本語", "한국어"]} />
+          <Row label="Dark mode" v={prefs.darkMode} on={savePref("darkMode")} />
         </Section>
+
         <Section title="Notifications">
-          <Row label="Push notifications" v={state.notifications} on={T("notifications")} />
+          <Row label="Push notifications" v={prefs.notifications} on={savePref("notifications")} />
         </Section>
+
         <Section title="Privacy & Security">
-          <Row label="Private profile" v={state.privacy} on={T("privacy")} />
-          <Row label="Two-factor authentication" v={state.twoFA} on={T("twoFA")} />
+          <Row label="Private profile" v={prefs.privacy} on={savePref("privacy")} />
+          <Row label="Two-factor authentication" v={prefs.twoFA} on={savePref("twoFA")} />
+          <div className="px-5 py-3">
+            <Button variant="destructive" className="rounded-full" onClick={deleteAccount}>Sign out & clear session</Button>
+          </div>
         </Section>
       </div>
     </AppShell>
@@ -57,16 +156,6 @@ function Row({ label, v, on }: { label: string; v: boolean; on: (v: boolean) => 
     <div className="flex items-center justify-between px-5 py-3">
       <Label className="text-sm">{label}</Label>
       <Switch checked={v} onCheckedChange={on} />
-    </div>
-  );
-}
-function SelectRow({ label, options }: { label: string; options: string[] }) {
-  return (
-    <div className="flex items-center justify-between px-5 py-3">
-      <Label className="text-sm">{label}</Label>
-      <select className="bg-transparent text-sm border border-border rounded-full px-3 py-1.5">
-        {options.map((o) => <option key={o} className="bg-background">{o}</option>)}
-      </select>
     </div>
   );
 }
