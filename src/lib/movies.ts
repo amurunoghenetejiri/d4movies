@@ -1,12 +1,27 @@
+import { queryOptions, useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
+export type MovieCategory =
+  | "Hollywood"
+  | "Nollywood"
+  | "Bollywood"
+  | "Korean Drama"
+  | "Chinese Drama"
+  | "Anime"
+  | "TV Series";
+
 export type Movie = {
-  id: string;
+  id: string; // slug used in URLs
+  dbId: string; // UUID from Supabase
   title: string;
   year: number;
   rating: number;
   runtime: string;
+  runtimeMinutes: number;
   quality: "HD" | "4K" | "FHD";
   genres: string[];
-  category: string; // hollywood, nollywood, etc.
+  category: MovieCategory;
   country: string;
   language: string;
   description: string;
@@ -18,98 +33,101 @@ export type Movie = {
   featured?: boolean;
   topRated?: boolean;
   comingSoon?: boolean;
+  trailerUrl?: string;
+  movieUrl?: string;
+  createdBy?: string | null;
 };
 
-const posterFor = (id: string, seed: number) =>
-  `https://picsum.photos/seed/${id}-${seed}/500/750`;
-const backdropFor = (id: string, seed: number) =>
-  `https://picsum.photos/seed/${id}-${seed}-bg/1600/900`;
-
-const titles = [
-  ["Neon Skyline", "Hollywood"], ["Crimson Oath", "Hollywood"], ["Silent Meridian", "Hollywood"],
-  ["Eclipse Protocol", "Hollywood"], ["The Last Cartographer", "Hollywood"], ["Velvet Static", "Hollywood"],
-  ["Ashes of Andromeda", "Hollywood"], ["Ironveil", "Hollywood"], ["Paper Kingdoms", "Hollywood"],
-  ["Ghost Frequency", "Hollywood"],
-  ["Lagos After Dark", "Nollywood"], ["The Bride Price", "Nollywood"], ["Owerri Nights", "Nollywood"],
-  ["Iyanu", "Nollywood"], ["The Governor's Daughter", "Nollywood"], ["Broken Calabash", "Nollywood"],
-  ["Sons of Benin", "Nollywood"], ["Palace of Whispers", "Nollywood"],
-  ["Monsoon Heart", "Bollywood"], ["Delhi Diaries", "Bollywood"], ["Raja & Roshni", "Bollywood"],
-  ["The Mumbai Line", "Bollywood"], ["Chandni Rooftops", "Bollywood"], ["Kesari Sky", "Bollywood"],
-  ["Seoul Encoded", "Korean Drama"], ["My Neighbor the Ghost", "Korean Drama"], ["Winter in Busan", "Korean Drama"],
-  ["The Cafe on Jeju", "Korean Drama"], ["Signal 404", "Korean Drama"],
-  ["Shanghai Mirage", "Chinese Drama"], ["The Ink Painter", "Chinese Drama"], ["Nine Lanterns", "Chinese Drama"],
-  ["Peach Blossom Vow", "Chinese Drama"],
-  ["Chronoblade", "Anime"], ["Starforge Academy", "Anime"], ["The Kitsune Contract", "Anime"],
-  ["Neon Samurai", "Anime"], ["Astral Bakery", "Anime"], ["Depths of Miroku", "Anime"],
-  ["The Cartographer's Wife", "TV Series"], ["Undertow", "TV Series"], ["Signal Grid", "TV Series"],
-  ["House of Ember", "TV Series"], ["Blackwater Bay", "TV Series"], ["The Understudy", "TV Series"],
-];
-
-const genrePool = [
-  "Action", "Adventure", "Comedy", "Drama", "Romance", "Sci-Fi",
-  "Fantasy", "Crime", "Animation", "Documentary", "Family", "Thriller", "Mystery", "Horror",
-];
-
-const countries: Record<string, string> = {
-  Hollywood: "United States",
-  Nollywood: "Nigeria",
-  Bollywood: "India",
-  "Korean Drama": "South Korea",
-  "Chinese Drama": "China",
-  Anime: "Japan",
-  "TV Series": "United Kingdom",
+type MovieRow = {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  poster: string | null;
+  backdrop: string | null;
+  trailer_url: string | null;
+  movie_url: string | null;
+  genres: string[];
+  actors: string[];
+  director: string | null;
+  language: string | null;
+  country: string | null;
+  release_year: number;
+  category: MovieCategory;
+  quality: "HD" | "4K" | "FHD";
+  runtime_minutes: number;
+  rating: number;
+  trending: boolean;
+  featured: boolean;
+  top_rated: boolean;
+  coming_soon: boolean;
+  created_by: string | null;
 };
 
-const langs: Record<string, string> = {
-  Hollywood: "English",
-  Nollywood: "English",
-  Bollywood: "Hindi",
-  "Korean Drama": "Korean",
-  "Chinese Drama": "Mandarin",
-  Anime: "Japanese",
-  "TV Series": "English",
-};
-
-function makeMovie(i: number): Movie {
-  const [title, cat] = titles[i % titles.length];
-  const id = `${cat.toLowerCase().replace(/\s/g, "-")}-${i + 1}`;
-  const year = 2019 + ((i * 3) % 8);
-  const rating = +(6.5 + ((i * 7) % 35) / 10).toFixed(1);
-  const rmin = 82 + ((i * 11) % 60);
-  const runtime = `${Math.floor(rmin / 60)}h ${rmin % 60}m`;
-  const genres = [genrePool[i % genrePool.length], genrePool[(i * 3 + 2) % genrePool.length]];
-  const q: Movie["quality"] = ["4K", "HD", "FHD", "HD"][i % 4] as Movie["quality"];
+export function mapMovie(r: MovieRow): Movie {
   return {
-    id,
-    title,
-    year,
-    rating,
-    runtime,
-    quality: q,
-    genres,
-    category: cat,
-    country: countries[cat] ?? "Global",
-    language: langs[cat] ?? "English",
-    description:
-      `${title} follows a bold journey through ${genres[0].toLowerCase()} and ${genres[1].toLowerCase()}. ` +
-      `A cinematic story rich in atmosphere, emotion, and unforgettable characters — crafted for the D4TECH audience.`,
-    director: ["Ava Duvernay", "Bong Joon-ho", "Kunle Afolayan", "Zoya Akhtar", "Makoto Shinkai", "Denis Villeneuve"][i % 6],
-    cast: ["Idris Elba", "Zendaya", "Genevieve Nnaji", "Deepika Padukone", "Song Kang", "Chris Evans", "Lupita Nyong'o"].slice(0, 4 + (i % 3)),
-    poster: posterFor(id, i + 1),
-    backdrop: backdropFor(id, i + 1),
-    trending: i % 5 === 0,
-    featured: i < 6,
-    topRated: rating > 8.5,
-    comingSoon: i % 11 === 0 && year >= 2025,
+    id: r.slug,
+    dbId: r.id,
+    title: r.title,
+    year: r.release_year,
+    rating: Number(r.rating),
+    runtimeMinutes: r.runtime_minutes,
+    runtime: `${Math.floor(r.runtime_minutes / 60)}h ${r.runtime_minutes % 60}m`,
+    quality: r.quality,
+    genres: r.genres ?? [],
+    category: r.category,
+    country: r.country ?? "Global",
+    language: r.language ?? "English",
+    description: r.description ?? "",
+    director: r.director ?? "—",
+    cast: r.actors ?? [],
+    poster: r.poster ?? `https://picsum.photos/seed/${r.slug}/500/750`,
+    backdrop: r.backdrop ?? `https://picsum.photos/seed/${r.slug}-bg/1600/900`,
+    trending: r.trending,
+    featured: r.featured,
+    topRated: r.top_rated,
+    comingSoon: r.coming_soon,
+    trailerUrl: r.trailer_url ?? undefined,
+    movieUrl: r.movie_url ?? undefined,
+    createdBy: r.created_by,
   };
 }
 
-export const movies: Movie[] = Array.from({ length: 48 }, (_, i) => makeMovie(i));
+export const moviesQueryOptions = () =>
+  queryOptions({
+    queryKey: ["movies"],
+    queryFn: async (): Promise<Movie[]> => {
+      const { data, error } = await supabase
+        .from("movies")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data as MovieRow[]).map(mapMovie);
+    },
+    staleTime: 60_000,
+  });
 
-export const findMovie = (id: string) => movies.find((m) => m.id === id);
+export function useAllMovies(): Movie[] {
+  const { data } = useQuery(moviesQueryOptions());
+  return data ?? [];
+}
 
-export const filterByCategory = (cat: string) =>
-  movies.filter((m) => m.category.toLowerCase() === cat.toLowerCase());
+export function useMovieBySlug(slug: string | undefined): Movie | undefined {
+  const list = useAllMovies();
+  return useMemo(() => list.find((m) => m.id === slug), [list, slug]);
+}
 
-export const allGenres = Array.from(new Set(movies.flatMap((m) => m.genres))).sort();
-export const allCountries = Array.from(new Set(movies.map((m) => m.country))).sort();
+export function useGenres(): string[] {
+  const list = useAllMovies();
+  return useMemo(
+    () => Array.from(new Set(list.flatMap((m) => m.genres))).sort(),
+    [list],
+  );
+}
+export function useCountries(): string[] {
+  const list = useAllMovies();
+  return useMemo(
+    () => Array.from(new Set(list.map((m) => m.country))).sort(),
+    [list],
+  );
+}
