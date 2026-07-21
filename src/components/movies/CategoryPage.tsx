@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { MovieGrid } from "@/components/movies/MovieGrid";
-import { movies as ALL, allGenres, type Movie } from "@/lib/movies";
+import { useAllMovies, useGenres, type Movie } from "@/lib/movies";
 import { Button } from "@/components/ui/button";
 
 export type CategoryProps = {
@@ -16,15 +16,17 @@ export type CategoryProps = {
 export function CategoryPage({ title, subtitle, kicker, filter, showGenreFilter = true }: CategoryProps) {
   const [genre, setGenre] = useState<string | null>(null);
   const [sort, setSort] = useState<"newest" | "rating" | "title">("newest");
+  const all = useAllMovies();
+  const genres = useGenres();
 
   const list = useMemo(() => {
-    let l = filter ? ALL.filter(filter) : ALL;
+    let l = filter ? all.filter(filter) : all;
     if (genre) l = l.filter((m) => m.genres.includes(genre));
     if (sort === "rating") l = [...l].sort((a, b) => b.rating - a.rating);
     else if (sort === "title") l = [...l].sort((a, b) => a.title.localeCompare(b.title));
     else l = [...l].sort((a, b) => b.year - a.year);
     return l;
-  }, [filter, genre, sort]);
+  }, [all, filter, genre, sort]);
 
   return (
     <AppShell>
@@ -36,7 +38,7 @@ export function CategoryPage({ title, subtitle, kicker, filter, showGenreFilter 
               size="sm" variant={!genre ? "default" : "ghost"}
               onClick={() => setGenre(null)} className="rounded-full"
             >All</Button>
-            {allGenres.map((g) => (
+            {genres.map((g) => (
               <Button
                 key={g} size="sm" variant={genre === g ? "default" : "ghost"}
                 onClick={() => setGenre(g)} className="rounded-full"

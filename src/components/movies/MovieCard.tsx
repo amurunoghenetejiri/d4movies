@@ -3,9 +3,46 @@ import { Bookmark, Heart, Play, Star, Download, Share2 } from "lucide-react";
 import type { Movie } from "@/lib/movies";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import {
+  useIsFavorite,
+  useIsInWatchlist,
+  useQueueDownload,
+  useToggleFavorite,
+  useToggleWatchlist,
+} from "@/lib/user-data";
+import { useAuth } from "@/hooks/use-auth";
 
 export function MovieCard({ m, size = "md" }: { m: Movie; size?: "sm" | "md" | "lg" }) {
   const width = size === "lg" ? "w-56 md:w-64" : size === "sm" ? "w-32 md:w-36" : "w-40 md:w-48";
+  const { user } = useAuth();
+  const inWatch = useIsInWatchlist(m.dbId);
+  const inFav = useIsFavorite(m.dbId);
+  const toggleWatch = useToggleWatchlist();
+  const toggleFav = useToggleFavorite();
+  const queueDl = useQueueDownload();
+
+  const requireAuth = () => {
+    if (!user) {
+      toast.error("Sign in to save this — it takes a second");
+      return false;
+    }
+    return true;
+  };
+
+  const share = async () => {
+    const url = `${window.location.origin}/movie/${m.id}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: m.title, text: m.description, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast("Link copied", { description: m.title });
+      }
+    } catch {
+      /* user cancelled share */
+    }
+  };
+
   return (
     <div className={`group relative shrink-0 ${width} hover-lift`}>
       <Link to="/movie/$id" params={{ id: m.id }} className="block">
@@ -40,21 +77,45 @@ export function MovieCard({ m, size = "md" }: { m: Movie; size?: "sm" | "md" | "
       </Link>
       <div className="mt-2 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         <div className="flex gap-1">
-          <Button size="icon" variant="ghost" className="size-7 rounded-full" aria-label="Watchlist"
-            onClick={() => toast.success("Added to Watchlist", { description: m.title })}>
-            <Bookmark className="size-3.5" />
+          <Button
+            size="icon" variant="ghost"
+            className={`size-7 rounded-full ${inWatch.data ? "text-primary" : ""}`}
+            aria-label="Watchlist"
+            onClick={(e) => {
+              e.preventDefault();
+              if (!requireAuth()) return;
+              toggleWatch.mutate({ movieDbId: m.dbId, isIn: !!inWatch.data });
+            }}
+          >
+            <Bookmark className={`size-3.5 ${inWatch.data ? "fill-current" : ""}`} />
           </Button>
-          <Button size="icon" variant="ghost" className="size-7 rounded-full" aria-label="Favorite"
-            onClick={() => toast.success("Added to Favorites", { description: m.title })}>
-            <Heart className="size-3.5" />
+          <Button
+            size="icon" variant="ghost"
+            className={`size-7 rounded-full ${inFav.data ? "text-red-500" : ""}`}
+            aria-label="Favorite"
+            onClick={(e) => {
+              e.preventDefault();
+              if (!requireAuth()) return;
+              toggleFav.mutate({ movieDbId: m.dbId, isIn: !!inFav.data });
+            }}
+          >
+            <Heart className={`size-3.5 ${inFav.data ? "fill-current" : ""}`} />
           </Button>
           <Button size="icon" variant="ghost" className="size-7 rounded-full" aria-label="Share"
-            onClick={() => toast("Link copied", { description: m.title })}>
+            onClick={(e) => { e.preventDefault(); void share(); }}>
             <Share2 className="size-3.5" />
           </Button>
         </div>
-        <Button size="icon" variant="ghost" className="size-7 rounded-full text-gold" aria-label="Download"
-          onClick={() => toast.success("Download queued", { description: m.title })}>
+        <Button
+          size="icon" variant="ghost"
+          className="size-7 rounded-full text-gold"
+          aria-label="Download"
+          onClick={(e) => {
+            e.preventDefault();
+            if (!requireAuth()) return;
+            queueDl.mutate(m.dbId);
+          }}
+        >
           <Download className="size-3.5" />
         </Button>
       </div>
