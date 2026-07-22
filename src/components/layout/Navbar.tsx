@@ -142,6 +142,7 @@ export function Navbar() {
                     </div>
                     <div className="h-px bg-border my-1" />
                     <MenuLink to="/profile" icon={User}>Profile</MenuLink>
+                    <MenuLink to="/upload" icon={UploadCloud}>Upload</MenuLink>
                     <MenuLink to="/watchlist" icon={Bookmark}>Watchlist</MenuLink>
                     <MenuLink to="/favorites" icon={Heart}>Favorites</MenuLink>
                     <MenuLink to="/history" icon={Clock}>History</MenuLink>
