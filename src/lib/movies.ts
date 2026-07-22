@@ -35,6 +35,14 @@ export type Movie = {
   comingSoon?: boolean;
   trailerUrl?: string;
   movieUrl?: string;
+  subtitleUrl?: string;
+  thumbnail?: string;
+  originalTitle?: string;
+  producer?: string;
+  ageRating?: string;
+  tags?: string[];
+  isHidden?: boolean;
+  isPinned?: boolean;
   createdBy?: string | null;
 };
 
@@ -89,6 +97,14 @@ export function mapMovie(r: MovieRow): Movie {
     comingSoon: r.coming_soon,
     trailerUrl: r.trailer_url ?? undefined,
     movieUrl: r.movie_url ?? undefined,
+    subtitleUrl: (r as any).subtitle_url ?? undefined,
+    thumbnail: (r as any).thumbnail ?? undefined,
+    originalTitle: (r as any).original_title ?? undefined,
+    producer: (r as any).producer ?? undefined,
+    ageRating: (r as any).age_rating ?? undefined,
+    tags: (r as any).tags ?? [],
+    isHidden: (r as any).is_hidden ?? false,
+    isPinned: (r as any).is_pinned ?? false,
     createdBy: r.created_by,
   };
 }

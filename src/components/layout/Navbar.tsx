@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
-import { Bell, Search, User, Menu, X, Home, Film, Tv, Sparkles, TrendingUp, LogOut, Settings as SettingsIcon, Shield, Heart, Bookmark, Clock, Download } from "lucide-react";
+import { Bell, Search, User, Menu, X, Home, Film, Tv, Sparkles, TrendingUp, LogOut, Settings as SettingsIcon, Shield, Heart, Bookmark, Clock, Download, UploadCloud } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Logo } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/button";
@@ -89,6 +89,9 @@ export function Navbar() {
             <Button asChild variant="ghost" size="icon" className="rounded-full">
               <Link to="/search" aria-label="Search"><Search className="size-5" /></Link>
             </Button>
+            <Button asChild size="sm" variant="ghost" className="hidden md:inline-flex rounded-full gap-1.5">
+              <Link to="/upload"><UploadCloud className="size-4" /> Upload</Link>
+            </Button>
 
             {user && (
               <div className="relative" ref={notifRef}>
@@ -139,6 +142,7 @@ export function Navbar() {
                     </div>
                     <div className="h-px bg-border my-1" />
                     <MenuLink to="/profile" icon={User}>Profile</MenuLink>
+                    <MenuLink to="/upload" icon={UploadCloud}>Upload</MenuLink>
                     <MenuLink to="/watchlist" icon={Bookmark}>Watchlist</MenuLink>
                     <MenuLink to="/favorites" icon={Heart}>Favorites</MenuLink>
                     <MenuLink to="/history" icon={Clock}>History</MenuLink>
