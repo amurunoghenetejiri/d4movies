@@ -7,10 +7,12 @@ import { Button } from "@/components/ui/button";
 export function HeroCarousel({ movies }: { movies: Movie[] }) {
   const [i, setI] = useState(0);
   useEffect(() => {
+    if (!movies.length) return;
     const t = setInterval(() => setI((v) => (v + 1) % movies.length), 6000);
     return () => clearInterval(t);
   }, [movies.length]);
-  const m = movies[i];
+  if (!movies.length) return null;
+  const m = movies[i] ?? movies[0];
   return (
     <section className="relative h-[78vh] min-h-[520px] w-full overflow-hidden">
       {movies.map((mv, idx) => (
