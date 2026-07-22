@@ -89,6 +89,9 @@ export function Navbar() {
             <Button asChild variant="ghost" size="icon" className="rounded-full">
               <Link to="/search" aria-label="Search"><Search className="size-5" /></Link>
             </Button>
+            <Button asChild size="sm" variant="ghost" className="hidden md:inline-flex rounded-full gap-1.5">
+              <Link to="/upload"><UploadCloud className="size-4" /> Upload</Link>
+            </Button>
 
             {user && (
               <div className="relative" ref={notifRef}>
