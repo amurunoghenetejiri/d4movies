@@ -152,6 +152,56 @@ export type Database = {
           },
         ]
       }
+      media_files: {
+        Row: {
+          bucket: string
+          created_at: string
+          file_name: string
+          file_size: number
+          file_type: string | null
+          id: string
+          kind: string
+          movie_id: string | null
+          path: string
+          url: string | null
+          user_id: string
+        }
+        Insert: {
+          bucket: string
+          created_at?: string
+          file_name: string
+          file_size?: number
+          file_type?: string | null
+          id?: string
+          kind?: string
+          movie_id?: string | null
+          path: string
+          url?: string | null
+          user_id: string
+        }
+        Update: {
+          bucket?: string
+          created_at?: string
+          file_name?: string
+          file_size?: number
+          file_type?: string | null
+          id?: string
+          kind?: string
+          movie_id?: string | null
+          path?: string
+          url?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_files_movie_id_fkey"
+            columns: ["movie_id"]
+            isOneToOne: false
+            referencedRelation: "movies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       movie_likes: {
         Row: {
           id: string
@@ -184,6 +234,7 @@ export type Database = {
       movies: {
         Row: {
           actors: string[]
+          age_rating: string | null
           backdrop: string | null
           category: Database["public"]["Enums"]["movie_category"]
           coming_soon: boolean
@@ -195,14 +246,21 @@ export type Database = {
           featured: boolean
           genres: string[]
           id: string
+          is_hidden: boolean
+          is_pinned: boolean
           language: string | null
           movie_url: string | null
+          original_title: string | null
           poster: string | null
+          producer: string | null
           quality: Database["public"]["Enums"]["movie_quality"]
           rating: number
           release_year: number
           runtime_minutes: number
           slug: string
+          subtitle_url: string | null
+          tags: string[]
+          thumbnail: string | null
           title: string
           top_rated: boolean
           trailer_url: string | null
@@ -212,6 +270,7 @@ export type Database = {
         }
         Insert: {
           actors?: string[]
+          age_rating?: string | null
           backdrop?: string | null
           category?: Database["public"]["Enums"]["movie_category"]
           coming_soon?: boolean
@@ -223,14 +282,21 @@ export type Database = {
           featured?: boolean
           genres?: string[]
           id?: string
+          is_hidden?: boolean
+          is_pinned?: boolean
           language?: string | null
           movie_url?: string | null
+          original_title?: string | null
           poster?: string | null
+          producer?: string | null
           quality?: Database["public"]["Enums"]["movie_quality"]
           rating?: number
           release_year?: number
           runtime_minutes?: number
           slug: string
+          subtitle_url?: string | null
+          tags?: string[]
+          thumbnail?: string | null
           title: string
           top_rated?: boolean
           trailer_url?: string | null
@@ -240,6 +306,7 @@ export type Database = {
         }
         Update: {
           actors?: string[]
+          age_rating?: string | null
           backdrop?: string | null
           category?: Database["public"]["Enums"]["movie_category"]
           coming_soon?: boolean
@@ -251,14 +318,21 @@ export type Database = {
           featured?: boolean
           genres?: string[]
           id?: string
+          is_hidden?: boolean
+          is_pinned?: boolean
           language?: string | null
           movie_url?: string | null
+          original_title?: string | null
           poster?: string | null
+          producer?: string | null
           quality?: Database["public"]["Enums"]["movie_quality"]
           rating?: number
           release_year?: number
           runtime_minutes?: number
           slug?: string
+          subtitle_url?: string | null
+          tags?: string[]
+          thumbnail?: string | null
           title?: string
           top_rated?: boolean
           trailer_url?: string | null
