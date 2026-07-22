@@ -64,12 +64,19 @@ function SettingsPage() {
 
   const uploadAvatar = async (file: File) => {
     if (!user) return;
-    const ext = file.name.split(".").pop();
-    const path = `${user.id}/avatar.${ext}`;
-    const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
+    const ext = (file.name.split(".").pop() ?? "png").toLowerCase();
+    const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("profile-images").upload(path, file, { upsert: true, contentType: file.type });
     if (error) { toast.error(error.message); return; }
-    const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-    await supabase.from("profiles").update({ avatar_url: data.publicUrl }).eq("id", user.id);
+    const { data: signed, error: signErr } = await supabase.storage
+      .from("profile-images")
+      .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+    if (signErr || !signed?.signedUrl) { toast.error(signErr?.message ?? "Failed to publish avatar"); return; }
+    await supabase.from("profiles").update({ avatar_url: signed.signedUrl }).eq("id", user.id);
+    await supabase.from("media_files").insert({
+      user_id: user.id, bucket: "profile-images", path, url: signed.signedUrl,
+      file_name: file.name, file_size: file.size, file_type: file.type, kind: "avatar",
+    });
     await refreshProfile();
     toast.success("Avatar updated");
   };
