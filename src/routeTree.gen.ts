@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WatchlistRouteImport } from './routes/watchlist'
+import { Route as UploadRouteImport } from './routes/upload'
 import { Route as TvSeriesRouteImport } from './routes/tv-series'
 import { Route as TrendingRouteImport } from './routes/trending'
 import { Route as TopRatedRouteImport } from './routes/top-rated'
@@ -49,6 +50,11 @@ import { Route as MovieIdRouteImport } from './routes/movie.$id'
 const WatchlistRoute = WatchlistRouteImport.update({
   id: '/watchlist',
   path: '/watchlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UploadRoute = UploadRouteImport.update({
+  id: '/upload',
+  path: '/upload',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TvSeriesRoute = TvSeriesRouteImport.update({
@@ -261,6 +267,7 @@ export interface FileRoutesByFullPath {
   '/top-rated': typeof TopRatedRoute
   '/trending': typeof TrendingRoute
   '/tv-series': typeof TvSeriesRoute
+  '/upload': typeof UploadRoute
   '/watchlist': typeof WatchlistRoute
   '/movie/$id': typeof MovieIdRoute
   '/watch/$id': typeof WatchIdRoute
@@ -299,6 +306,7 @@ export interface FileRoutesByTo {
   '/top-rated': typeof TopRatedRoute
   '/trending': typeof TrendingRoute
   '/tv-series': typeof TvSeriesRoute
+  '/upload': typeof UploadRoute
   '/watchlist': typeof WatchlistRoute
   '/movie/$id': typeof MovieIdRoute
   '/watch/$id': typeof WatchIdRoute
@@ -338,6 +346,7 @@ export interface FileRoutesById {
   '/top-rated': typeof TopRatedRoute
   '/trending': typeof TrendingRoute
   '/tv-series': typeof TvSeriesRoute
+  '/upload': typeof UploadRoute
   '/watchlist': typeof WatchlistRoute
   '/movie/$id': typeof MovieIdRoute
   '/watch/$id': typeof WatchIdRoute
@@ -378,6 +387,7 @@ export interface FileRouteTypes {
     | '/top-rated'
     | '/trending'
     | '/tv-series'
+    | '/upload'
     | '/watchlist'
     | '/movie/$id'
     | '/watch/$id'
@@ -416,6 +426,7 @@ export interface FileRouteTypes {
     | '/top-rated'
     | '/trending'
     | '/tv-series'
+    | '/upload'
     | '/watchlist'
     | '/movie/$id'
     | '/watch/$id'
@@ -454,6 +465,7 @@ export interface FileRouteTypes {
     | '/top-rated'
     | '/trending'
     | '/tv-series'
+    | '/upload'
     | '/watchlist'
     | '/movie/$id'
     | '/watch/$id'
@@ -493,6 +505,7 @@ export interface RootRouteChildren {
   TopRatedRoute: typeof TopRatedRoute
   TrendingRoute: typeof TrendingRoute
   TvSeriesRoute: typeof TvSeriesRoute
+  UploadRoute: typeof UploadRoute
   WatchlistRoute: typeof WatchlistRoute
   MovieIdRoute: typeof MovieIdRoute
   WatchIdRoute: typeof WatchIdRoute
@@ -505,6 +518,13 @@ declare module '@tanstack/react-router' {
       path: '/watchlist'
       fullPath: '/watchlist'
       preLoaderRoute: typeof WatchlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/upload': {
+      id: '/upload'
+      path: '/upload'
+      fullPath: '/upload'
+      preLoaderRoute: typeof UploadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tv-series': {
@@ -789,6 +809,7 @@ const rootRouteChildren: RootRouteChildren = {
   TopRatedRoute: TopRatedRoute,
   TrendingRoute: TrendingRoute,
   TvSeriesRoute: TvSeriesRoute,
+  UploadRoute: UploadRoute,
   WatchlistRoute: WatchlistRoute,
   MovieIdRoute: MovieIdRoute,
   WatchIdRoute: WatchIdRoute,
