@@ -1,13 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
+import { PLACEHOLDER_BACKDROP, PLACEHOLDER_POSTER } from "./placeholders";
 
 export const TMDB_KEY = (import.meta.env.VITE_TMDB_API_KEY as string | undefined) ?? "";
 export const TMDB_ENABLED = TMDB_KEY.length > 0;
 
 const IMG = "https://image.tmdb.org/t/p";
 export const tmdbPoster = (p: string | null, size: "w342" | "w500" | "original" = "w500") =>
-  p ? `${IMG}/${size}${p}` : "https://picsum.photos/500/750";
+  p ? `${IMG}/${size}${p}` : PLACEHOLDER_POSTER;
 export const tmdbBackdrop = (p: string | null, size: "w780" | "w1280" | "original" = "w1280") =>
-  p ? `${IMG}/${size}${p}` : "https://picsum.photos/1280/720";
+  p ? `${IMG}/${size}${p}` : PLACEHOLDER_BACKDROP;
+
 
 export type TmdbItem = {
   id: number;
