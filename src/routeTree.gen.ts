@@ -45,6 +45,7 @@ import { Route as AnimeRouteImport } from './routes/anime'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WatchIdRouteImport } from './routes/watch.$id'
+import { Route as TmdbIdRouteImport } from './routes/tmdb.$id'
 import { Route as MovieIdRouteImport } from './routes/movie.$id'
 
 const WatchlistRoute = WatchlistRouteImport.update({
@@ -227,6 +228,11 @@ const WatchIdRoute = WatchIdRouteImport.update({
   path: '/watch/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TmdbIdRoute = TmdbIdRouteImport.update({
+  id: '/tmdb/$id',
+  path: '/tmdb/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MovieIdRoute = MovieIdRouteImport.update({
   id: '/movie/$id',
   path: '/movie/$id',
@@ -270,6 +276,7 @@ export interface FileRoutesByFullPath {
   '/upload': typeof UploadRoute
   '/watchlist': typeof WatchlistRoute
   '/movie/$id': typeof MovieIdRoute
+  '/tmdb/$id': typeof TmdbIdRoute
   '/watch/$id': typeof WatchIdRoute
 }
 export interface FileRoutesByTo {
@@ -309,6 +316,7 @@ export interface FileRoutesByTo {
   '/upload': typeof UploadRoute
   '/watchlist': typeof WatchlistRoute
   '/movie/$id': typeof MovieIdRoute
+  '/tmdb/$id': typeof TmdbIdRoute
   '/watch/$id': typeof WatchIdRoute
 }
 export interface FileRoutesById {
@@ -349,6 +357,7 @@ export interface FileRoutesById {
   '/upload': typeof UploadRoute
   '/watchlist': typeof WatchlistRoute
   '/movie/$id': typeof MovieIdRoute
+  '/tmdb/$id': typeof TmdbIdRoute
   '/watch/$id': typeof WatchIdRoute
 }
 export interface FileRouteTypes {
@@ -390,6 +399,7 @@ export interface FileRouteTypes {
     | '/upload'
     | '/watchlist'
     | '/movie/$id'
+    | '/tmdb/$id'
     | '/watch/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -429,6 +439,7 @@ export interface FileRouteTypes {
     | '/upload'
     | '/watchlist'
     | '/movie/$id'
+    | '/tmdb/$id'
     | '/watch/$id'
   id:
     | '__root__'
@@ -468,6 +479,7 @@ export interface FileRouteTypes {
     | '/upload'
     | '/watchlist'
     | '/movie/$id'
+    | '/tmdb/$id'
     | '/watch/$id'
   fileRoutesById: FileRoutesById
 }
@@ -508,6 +520,7 @@ export interface RootRouteChildren {
   UploadRoute: typeof UploadRoute
   WatchlistRoute: typeof WatchlistRoute
   MovieIdRoute: typeof MovieIdRoute
+  TmdbIdRoute: typeof TmdbIdRoute
   WatchIdRoute: typeof WatchIdRoute
 }
 
@@ -765,6 +778,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WatchIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tmdb/$id': {
+      id: '/tmdb/$id'
+      path: '/tmdb/$id'
+      fullPath: '/tmdb/$id'
+      preLoaderRoute: typeof TmdbIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/movie/$id': {
       id: '/movie/$id'
       path: '/movie/$id'
@@ -812,18 +832,9 @@ const rootRouteChildren: RootRouteChildren = {
   UploadRoute: UploadRoute,
   WatchlistRoute: WatchlistRoute,
   MovieIdRoute: MovieIdRoute,
+  TmdbIdRoute: TmdbIdRoute,
   WatchIdRoute: WatchIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

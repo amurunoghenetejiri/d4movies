@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
-import { Bell, Search, User, Menu, X, Home, Film, Tv, Sparkles, TrendingUp, LogOut, Settings as SettingsIcon, Shield, Heart, Bookmark, Clock, Download, UploadCloud } from "lucide-react";
+import { Bell, Search, User, Menu, X, Home, Film, Tv, UserCircle, TrendingUp, LogOut, Settings as SettingsIcon, Shield, Heart, Bookmark, Clock, Download, UploadCloud } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Logo } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/button";
@@ -220,7 +220,7 @@ export function Navbar() {
             { to: "/movies", label: "Movies", icon: Film },
             { to: "/tv-series", label: "TV", icon: Tv },
             { to: "/trending", label: "Trend", icon: TrendingUp },
-            { to: "/profile", label: "Me", icon: Sparkles },
+            { to: "/profile", label: "Me", icon: UserCircle },
           ].map((i) => (
             <Link
               key={i.to}
