@@ -69,7 +69,7 @@ export function Navbar() {
       >
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 md:px-6">
           <Link to="/" className="flex items-center gap-2 shrink-0">
-            <Logo size={90} withText />
+            <Logo size={100} withText />
           </Link>
 
           <nav className="hidden lg:flex items-center gap-1">
@@ -182,7 +182,7 @@ export function Navbar() {
           <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={() => setOpen(false)} />
           <div className="absolute right-0 top-0 h-full w-[82%] max-w-sm glass-strong p-5 flex flex-col gap-1 animate-zoom-soft overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <Logo size={90} withText />
+              <Logo size={100} withText />
               <Button variant="ghost" size="icon" onClick={() => setOpen(false)} aria-label="Close">
                 <X className="size-5" />
               </Button>
