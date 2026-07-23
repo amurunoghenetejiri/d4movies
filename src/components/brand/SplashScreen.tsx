@@ -76,7 +76,7 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
           <div className="absolute inset-0 -m-10 rounded-full border border-primary/40" style={{ animation: "splashRing 2.6s ease-out infinite" }} />
           <div className="absolute inset-0 -m-16 rounded-full border border-primary/20" style={{ animation: "splashRing 2.6s ease-out 0.4s infinite" }} />
           <div style={{ animation: "splashIris .9s cubic-bezier(.2,.7,.2,1) both" }}>
-            <Logo size={200} glow />
+            <Logo size={300} glow />
           </div>
         </div>
 
