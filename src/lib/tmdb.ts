@@ -94,6 +94,17 @@ export const useTmdbSearch = (q: string) =>
     staleTime: 60_000,
   });
 
+export const useTmdbRecommendations = (id: string | number | undefined) =>
+  useQuery({
+    queryKey: ["tmdb", "rec", id],
+    queryFn: async () => {
+      const d = await tmdbFetch<{ results: TmdbItem[] }>(`/movie/${id}/recommendations`);
+      return d.results ?? [];
+    },
+    enabled: TMDB_ENABLED && !!id,
+    staleTime: 10 * 60_000,
+  });
+
 export function tmdbYouTubeKey(detail: TmdbDetail | undefined): string | null {
   const vids = detail?.videos?.results ?? [];
   const yt = vids.filter((v) => v.site === "YouTube");
