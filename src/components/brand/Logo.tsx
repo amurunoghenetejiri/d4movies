@@ -20,10 +20,10 @@ export function Logo({ size = 78, withText = false, className = "", glow = false
       />
       {withText && (
         <span className="font-display text-lg font-bold tracking-tight">
-          <span className="text-gradient-emerald">D4TECH</span>{" "}
+          <span className="text-gradient-emerald">D4</span>{" "}
           <span className="text-foreground/90">Movies</span>
         </span>
-      )}
+      )} 
     </div>
   );
 }
