@@ -75,8 +75,10 @@ function TmdbDetailPage() {
 
               <div className="mt-6 flex flex-wrap gap-2">
                 {yt ? (
-                  <Button size="lg" className="rounded-full glow-emerald" onClick={() => setPlaying(true)}>
-                    <Play className="size-4 fill-current mr-1" /> Play Trailer
+                  <Button asChild size="lg" className="rounded-full glow-emerald">
+                    <Link to="/trailer/$id" params={{ id }}>
+                      <Play className="size-4 fill-current mr-1" /> Watch Trailer
+                    </Link>
                   </Button>
                 ) : (
                   <Button size="lg" variant="secondary" disabled className="rounded-full">No trailer available</Button>
@@ -88,20 +90,6 @@ function TmdbDetailPage() {
             </div>
           </div>
 
-          {playing && yt && (
-            <div className="fixed inset-0 z-[80] bg-black/90 grid place-items-center p-4" onClick={() => setPlaying(false)}>
-              <div className="relative w-full max-w-5xl aspect-video" onClick={(e) => e.stopPropagation()}>
-                <iframe
-                  className="h-full w-full rounded-2xl"
-                  src={`https://www.youtube.com/embed/${yt}?autoplay=1&rel=0`}
-                  title="Trailer"
-                  allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-                  allowFullScreen
-                />
-                <button onClick={() => setPlaying(false)} className="absolute -top-10 right-0 text-sm text-muted-foreground hover:text-foreground">Close ✕</button>
-              </div>
-            </div>
-          )}
 
           {cast.length > 0 && (
             <section className="mt-10">
