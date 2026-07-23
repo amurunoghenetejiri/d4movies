@@ -86,7 +86,7 @@ export const useTmdbSearch = (q: string) =>
     queryKey: ["tmdb", "search", q],
     queryFn: async () => {
       const d = await tmdbFetch<{ results: TmdbItem[] }>("/search/multi", { query: q, include_adult: "false" });
-      return (d.results ?? []).filter((r) => r.media_type !== "person");
+      return (d.results ?? []).filter((r) => (r.media_type as string) !== "person");
     },
     enabled: TMDB_ENABLED && q.trim().length >= 2,
     staleTime: 60_000,
