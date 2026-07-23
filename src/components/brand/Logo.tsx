@@ -1,4 +1,4 @@
-
+import logoAsset from "@/assets/d4tech-logo.png.asset.json";
 
 type Props = {
   size?: number;
