@@ -3,6 +3,8 @@ import { useMemo, useRef, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Input } from "@/components/ui/input";
+import { PLACEHOLDER_BACKDROP, PLACEHOLDER_POSTER } from "@/lib/placeholders";
+
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
