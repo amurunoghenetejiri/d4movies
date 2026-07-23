@@ -6,7 +6,7 @@ type Props = {
   glow?: boolean;
 };
 
-export function Logo({ size = 98, withText = false, className = "", glow = false }: Props) {
+export function Logo({ size = 130, withText = false, className = "", glow = false }: Props) {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <img
@@ -20,8 +20,8 @@ export function Logo({ size = 98, withText = false, className = "", glow = false
       />
       {withText && (
         <span className="font-display text-lg font-bold tracking-tight">
-          <span className="text-gradient-emerald">D4</span>{" "}
-          <span className="text-foreground/90">Movies</span>
+          <span className="text-gradient-emerald"></span>{" "}
+          <span className="text-foreground/90"></span>
         </span>
       )} 
     </div>
