@@ -3,6 +3,8 @@ import { useMemo, useRef, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Input } from "@/components/ui/input";
+import { PLACEHOLDER_BACKDROP, PLACEHOLDER_POSTER } from "@/lib/placeholders";
+
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -143,8 +145,9 @@ function UploadPage() {
         title: title.trim(),
         slug,
         description,
-        poster: slots.poster.url ?? `https://picsum.photos/seed/${slug}/500/750`,
-        backdrop: slots.backdrop.url ?? `https://picsum.photos/seed/${slug}-bg/1600/900`,
+        poster: slots.poster.url ?? PLACEHOLDER_POSTER,
+        backdrop: slots.backdrop.url ?? PLACEHOLDER_BACKDROP,
+
         trailer_url: slots.trailer.url ?? null,
         movie_url: slots.movie.url ?? null,
         subtitle_url: slots.subtitle.url ?? null,

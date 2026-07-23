@@ -4,6 +4,8 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { tmdbBackdrop, tmdbPoster, tmdbYouTubeKey, useTmdbDetail, TMDB_ENABLED } from "@/lib/tmdb";
 import { useState } from "react";
+import { PLACEHOLDER_PORTRAIT } from "@/lib/placeholders";
+
 
 export const Route = createFileRoute("/tmdb/$id")({
   head: ({ params }) => ({
@@ -108,7 +110,7 @@ function TmdbDetailPage() {
                 {cast.map((c, i) => (
                   <div key={i} className="w-28 shrink-0 text-center">
                     <img
-                      src={c.profile_path ? `https://image.tmdb.org/t/p/w185${c.profile_path}` : "https://picsum.photos/185/278"}
+                      src={c.profile_path ? `https://image.tmdb.org/t/p/w185${c.profile_path}` : PLACEHOLDER_PORTRAIT}
                       alt={c.name}
                       className="w-28 h-36 object-cover rounded-xl border border-border/50"
                     />

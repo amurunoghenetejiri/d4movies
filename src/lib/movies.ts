@@ -1,6 +1,8 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { PLACEHOLDER_BACKDROP, PLACEHOLDER_POSTER } from "./placeholders";
+
 
 export type MovieCategory =
   | "Hollywood"
@@ -89,8 +91,9 @@ export function mapMovie(r: MovieRow): Movie {
     description: r.description ?? "",
     director: r.director ?? "—",
     cast: r.actors ?? [],
-    poster: r.poster ?? `https://picsum.photos/seed/${r.slug}/500/750`,
-    backdrop: r.backdrop ?? `https://picsum.photos/seed/${r.slug}-bg/1600/900`,
+    poster: r.poster ?? PLACEHOLDER_POSTER,
+    backdrop: r.backdrop ?? PLACEHOLDER_BACKDROP,
+
     trending: r.trending,
     featured: r.featured,
     topRated: r.top_rated,
