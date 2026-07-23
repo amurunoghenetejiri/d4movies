@@ -50,7 +50,7 @@ export function Footer() {
           <div className="md:col-span-2">
             <Logo size={48} withText glow />
             <p className="mt-4 text-sm text-muted-foreground max-w-sm">
-              Stream. Discover. Enjoy. D4TECH Movies delivers premium cinema and series from every corner of the world in stunning HD & 4K.
+              Stream. Discover. Enjoy. D4-STREAMS Movies delivers premium cinema and series from every corner of the world in stunning HD & 4K.
             </p>
             <div className="mt-5 flex gap-2">
               {[Twitter, Instagram, Youtube, Facebook].map((I, i) => (
@@ -82,7 +82,7 @@ export function Footer() {
         </div>
         <div className="mt-12 pt-6 border-t border-border/60 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
           <p>© 2026 D4TECH Movies. All Rights Reserved.</p>
-          <p>Made with ♥ for movie lovers worldwide.</p>
+          <p>Made with D4TECH for movie lovers worldwide.</p>
         </div>
       </div>
     </footer>
