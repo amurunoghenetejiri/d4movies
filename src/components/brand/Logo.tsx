@@ -1,4 +1,4 @@
-import logoAsset from "@/assets/d4tech-logo.png.asset.json";
+
 
 type Props = {
   size?: number;
@@ -11,7 +11,7 @@ export function Logo({ size = 40, withText = false, className = "", glow = false
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <img
-        src={logoAsset.url}
+        src="/logo.png"
         alt="D4TECH Movies"
         width={size}
         height={size}
