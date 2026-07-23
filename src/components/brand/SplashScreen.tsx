@@ -76,13 +76,13 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
           <div className="absolute inset-0 -m-10 rounded-full border border-primary/40" style={{ animation: "splashRing 2.6s ease-out infinite" }} />
           <div className="absolute inset-0 -m-16 rounded-full border border-primary/20" style={{ animation: "splashRing 2.6s ease-out 0.4s infinite" }} />
           <div style={{ animation: "splashIris .9s cubic-bezier(.2,.7,.2,1) both" }}>
-            <Logo size={450} glow />
+            <Logo size={550} glow />
           </div>
         </div>
 
         <div className="text-center overflow-hidden">
           <div
-            className="font-display text-4xl md:text-6xl font-extrabold tracking-tight"
+            className="font-display text-3xl md:text-5xl font-extrabold tracking-tight"
             style={{ animation: "splashFadeUp .9s .6s both" }}
           >
             <span className="text-gradient-emerald">D4</span>
