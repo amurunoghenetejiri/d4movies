@@ -20,7 +20,7 @@ export const Route = createFileRoute("/tmdb/$id")({
 function TmdbDetailPage() {
   const { id } = Route.useParams();
   const q = useTmdbDetail(id);
-  const [playing, setPlaying] = useState(false);
+
 
   if (!TMDB_ENABLED) {
     return (
