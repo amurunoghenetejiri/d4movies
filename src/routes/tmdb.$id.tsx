@@ -3,8 +3,8 @@ import { ArrowLeft, Play, Star } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { tmdbBackdrop, tmdbPoster, tmdbYouTubeKey, useTmdbDetail, TMDB_ENABLED } from "@/lib/tmdb";
-import { useState } from "react";
 import { PLACEHOLDER_PORTRAIT } from "@/lib/placeholders";
+
 
 
 export const Route = createFileRoute("/tmdb/$id")({
