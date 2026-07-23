@@ -6,7 +6,7 @@ type Props = {
   glow?: boolean;
 };
 
-export function Logo({ size = 64, withText = false, className = "", glow = false }: Props) {
+export function Logo({ size = 78, withText = false, className = "", glow = false }: Props) {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <img
