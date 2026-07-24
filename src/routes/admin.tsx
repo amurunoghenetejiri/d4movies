@@ -52,10 +52,11 @@ function AdminPage() {
   return (
     <AppShell>
       <PageHeader
-        eyebrow="D4TECH Admin"
-        title={<><span className="text-gradient-emerald">Admin</span> <span className="text-gradient-gold">Dashboard</span></>}
+        kicker="D4TECH Admin"
+        title="Admin Dashboard"
         subtitle="Manage the D4MOVIES universe — stats, content, users, reports, and creator payouts."
       />
+
       <div className="mx-auto max-w-7xl px-4 md:px-6 pb-16">
         {/* Tabs */}
         <div className="glass rounded-2xl p-1.5 flex flex-wrap gap-1 mb-6">
