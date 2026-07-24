@@ -28,8 +28,8 @@ export function TmdbCard({ item, size = "md" }: { item: TmdbItem; size?: "sm" | 
           </div>
         </div>
         <div className="absolute bottom-0 inset-x-0 p-3">
-          <h3 className="text-xs font-semibold line-clamp-1 text-foreground">{title}</h3>
-          <p className="text-[10px] md:text-[11px] text-muted-foreground">{year}</p>
+          <h3 className="text-xs md:text-lg font-semibold line-clamp-1 text-foreground">{title}</h3>
+          <p className="text-[10px] md:text-sm lg:text-base text-muted-foreground">{year}</p>
         </div>
       </div>
     </Link>
