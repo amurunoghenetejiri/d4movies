@@ -42,6 +42,7 @@ import { Route as ComingSoonRouteImport } from './routes/coming-soon'
 import { Route as ChineseDramaRouteImport } from './routes/chinese-drama'
 import { Route as BollywoodRouteImport } from './routes/bollywood'
 import { Route as AnimeRouteImport } from './routes/anime'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WatchIdRouteImport } from './routes/watch.$id'
@@ -214,6 +215,11 @@ const AnimeRoute = AnimeRouteImport.update({
   path: '/anime',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -248,6 +254,7 @@ const MovieIdRoute = MovieIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
   '/anime': typeof AnimeRoute
   '/bollywood': typeof BollywoodRoute
   '/chinese-drama': typeof ChineseDramaRoute
@@ -289,6 +296,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
   '/anime': typeof AnimeRoute
   '/bollywood': typeof BollywoodRoute
   '/chinese-drama': typeof ChineseDramaRoute
@@ -331,6 +339,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
   '/anime': typeof AnimeRoute
   '/bollywood': typeof BollywoodRoute
   '/chinese-drama': typeof ChineseDramaRoute
@@ -374,6 +383,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/admin'
     | '/anime'
     | '/bollywood'
     | '/chinese-drama'
@@ -415,6 +425,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/admin'
     | '/anime'
     | '/bollywood'
     | '/chinese-drama'
@@ -456,6 +467,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/admin'
     | '/anime'
     | '/bollywood'
     | '/chinese-drama'
@@ -498,6 +510,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRoute
   AnimeRoute: typeof AnimeRoute
   BollywoodRoute: typeof BollywoodRoute
   ChineseDramaRoute: typeof ChineseDramaRoute
@@ -770,6 +783,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnimeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -818,6 +838,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AdminRoute: AdminRoute,
   AnimeRoute: AnimeRoute,
   BollywoodRoute: BollywoodRoute,
   ChineseDramaRoute: ChineseDramaRoute,
