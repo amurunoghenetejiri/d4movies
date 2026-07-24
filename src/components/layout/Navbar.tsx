@@ -69,7 +69,7 @@ export function Navbar() {
       >
         <div className="mx-auto flex h-12 md:h-14 max-w-7xl items-center justify-between gap-3 px-3 md:px-6">
           <Link to="/" className="flex items-center gap-2 shrink-0">
-            <Logo size={36} className="md:hidden" />
+            <Logo size={66} className="md:hidden" />
             <Logo size={44} className="hidden md:flex" />
           </Link>
 
@@ -128,7 +128,7 @@ export function Navbar() {
               <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setMenuOpen((v) => !v)}
-                  className="size-9 rounded-full bg-gradient-to-br from-primary to-gold grid place-items-center text-sm font-bold text-primary-foreground"
+                  className="size-7 rounded-full bg-gradient-to-br from-primary to-gold grid place-items-center text-sm font-bold text-primary-foreground"
                   aria-label="Account"
                 >
                   {profile?.avatar_url
