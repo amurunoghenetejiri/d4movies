@@ -264,7 +264,7 @@ function Watch() {
       <div className="sticky top-0 z-40 bg-black">
         <div
           ref={containerRef}
-          className="relative aspect-video max-h-[35vh] md:max-h-[80vh] w-full bg-black overflow-hidden select-none"
+          className="relative aspect-video max-h-[60vh] md:max-h-[80vh] w-full bg-black overflow-hidden select-none"
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
@@ -372,7 +372,7 @@ function Watch() {
                 <Button size="icon" variant="ghost" className="rounded-full size-8 md:size-10" onClick={goFullscreen}><Maximize className="size-4" /></Button>
               </div>
             </div>
-            <div className="mt-1 text-[9px] md:text-[10px] text-muted-foreground/70 md:hidden text-center">
+            <div className="hidden">
               Double-tap: ±10s • Hold: 2× speed • Swipe L/R: brightness/volume • Pinch: zoom
             </div>
           </div>
