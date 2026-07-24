@@ -3,7 +3,7 @@ import { Play, Star } from "lucide-react";
 import { tmdbPoster, type TmdbItem } from "@/lib/tmdb";
 
 export function TmdbCard({ item, size = "md" }: { item: TmdbItem; size?: "sm" | "md" | "lg" }) {
-  const width = size === "lg" ? "w-44 md:w-48" : size === "sm" ? "w-24 md:w-28" : "w-28 md:w-32";
+  const width = size === "lg" ? "w-44 md:w-64" : size === "sm" ? "w-24 md:w-36" : "w-28 md:w-48";
   const title = (item as any).title ?? (item as any).name ?? "Untitled";
   const date = item.release_date ?? item.first_air_date ?? "";
   const year = date ? new Date(date).getFullYear() : "";
