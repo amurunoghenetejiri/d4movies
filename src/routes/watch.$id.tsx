@@ -264,7 +264,7 @@ function Watch() {
       <div className="sticky top-0 z-40 bg-black">
         <div
           ref={containerRef}
-          className="relative aspect-video max-h-[70vh] md:max-h-[80vh] w-full bg-black overflow-hidden select-none"
+          className="relative aspect-video max-h-[85vh] md:max-h-[95vh] w-full bg-black overflow-hidden select-none"
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
@@ -325,7 +325,7 @@ function Watch() {
                 <div className="font-semibold text-sm md:text-base truncate">{m.title}</div>
               </div>
             </div>
-            <Logo size={32} />
+            <Logo size={65} />
           </div>
 
           {!playing && m.movieUrl && (
