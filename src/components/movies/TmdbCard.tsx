@@ -9,7 +9,7 @@ export function TmdbCard({ item, size = "md" }: { item: TmdbItem; size?: "sm" | 
   const year = date ? new Date(date).getFullYear() : "";
   return (
     <Link to="/tmdb/$id" params={{ id: String(item.id) }} className={`group relative shrink-0 ${width} hover-lift block`}>
-      <div className="relative aspect-[2/3] max-h-46 overflow-hidden rounded-2xl border border-border/60 bg-muted">
+      <div className="relative aspect-[2/3] overflow-hidden rounded-2xl border border-border/60 bg-muted">
         <img
           src={tmdbPoster(item.poster_path)}
           alt={title}
@@ -29,7 +29,7 @@ export function TmdbCard({ item, size = "md" }: { item: TmdbItem; size?: "sm" | 
         </div>
         <div className="absolute bottom-0 inset-x-0 p-3">
           <h3 className="text-xs font-semibold line-clamp-1 text-foreground">{title}</h3>
-          <p className="text-[10px] text-muted-foreground">{year}</p>
+          <p className="text-[10px] md:text-[11px] text-muted-foreground">{year}</p>
         </div>
       </div>
     </Link>
