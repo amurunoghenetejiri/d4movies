@@ -3,13 +3,13 @@ import { Play, Star } from "lucide-react";
 import { tmdbPoster, type TmdbItem } from "@/lib/tmdb";
 
 export function TmdbCard({ item, size = "md" }: { item: TmdbItem; size?: "sm" | "md" | "lg" }) {
-  const width = size === "lg" ? "w-56 md:w-64" : size === "sm" ? "w-32 md:w-36" : "w-40 md:w-48";
+  const width = size === "lg" ? "w-44 md:w-48" : size === "sm" ? "w-24 md:w-28" : "w-28 md:w-32";
   const title = (item as any).title ?? (item as any).name ?? "Untitled";
   const date = item.release_date ?? item.first_air_date ?? "";
   const year = date ? new Date(date).getFullYear() : "";
   return (
     <Link to="/tmdb/$id" params={{ id: String(item.id) }} className={`group relative shrink-0 ${width} hover-lift block`}>
-      <div className="relative aspect-[2/3] overflow-hidden rounded-2xl border border-border/60 bg-muted">
+      <div className="relative aspect-[2/3] max-h-44 overflow-hidden rounded-2xl border border-border/60 bg-muted">
         <img
           src={tmdbPoster(item.poster_path)}
           alt={title}
