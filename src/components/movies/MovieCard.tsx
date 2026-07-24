@@ -103,8 +103,8 @@ export function MovieCard({ m, size = "md" }: { m: Movie; size?: "sm" | "md" | "
             </div>
           </div>
           <div className="absolute bottom-0 inset-x-0 p-3">
-            <h3 className="text-sm font-semibold line-clamp-1 text-foreground">{m.title}</h3>
-            <p className="text-[11px] text-muted-foreground">
+            <h3 className="text-sm md:text-lg font-semibold line-clamp-1 text-foreground">{m.title}</h3>
+            <p className="text-[11px] md:text-sm text-muted-foreground">
               {m.year} • {m.runtime} • {m.genres[0]}
             </p>
             {previewing && (
