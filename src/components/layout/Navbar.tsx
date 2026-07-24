@@ -67,9 +67,10 @@ export function Navbar() {
           scrolled ? "glass-strong" : "bg-transparent"
         }`}
       >
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 md:px-6">
+        <div className="mx-auto flex h-12 md:h-14 max-w-7xl items-center justify-between gap-3 px-3 md:px-6">
           <Link to="/" className="flex items-center gap-2 shrink-0">
-            <Logo size={150} withText />
+            <Logo size={36} className="md:hidden" />
+            <Logo size={44} className="hidden md:flex" />
           </Link>
 
           <nav className="hidden lg:flex items-center gap-1">
@@ -182,7 +183,7 @@ export function Navbar() {
           <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={() => setOpen(false)} />
           <div className="absolute right-0 top-0 h-full w-[82%] max-w-sm glass-strong p-5 flex flex-col gap-1 animate-zoom-soft overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <Logo size={150} withText />
+              <Logo size={40} />
               <Button variant="ghost" size="icon" onClick={() => setOpen(false)} aria-label="Close">
                 <X className="size-5" />
               </Button>

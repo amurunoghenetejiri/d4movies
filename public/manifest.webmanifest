@@ -1,0 +1,16 @@
+{
+  "name": "D4MOVIES — Stream. Discover. Enjoy.",
+  "short_name": "D4MOVIES",
+  "description": "Premium streaming for movies, TV series and anime.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#090909",
+  "theme_color": "#00C853",
+  "icons": [
+    { "src": "/logo.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -15,9 +15,9 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
   };
 
   useEffect(() => {
-    const skipT = setTimeout(() => setCanSkip(true), 2000);
-    const outT = setTimeout(() => setLeaving(true), 4400);
-    const doneT = setTimeout(onDone, 5100);
+    const skipT = setTimeout(() => setCanSkip(true), 3000);
+    const outT = setTimeout(() => setLeaving(true), 7200);
+    const doneT = setTimeout(onDone, 7900);
     return () => { clearTimeout(skipT); clearTimeout(outT); clearTimeout(doneT); };
   }, [onDone]);
 
@@ -75,8 +75,13 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
         <div className="relative">
           <div className="absolute inset-0 -m-10 rounded-full border border-primary/40" style={{ animation: "splashRing 2.6s ease-out infinite" }} />
           <div className="absolute inset-0 -m-16 rounded-full border border-primary/20" style={{ animation: "splashRing 2.6s ease-out 0.4s infinite" }} />
-          <div style={{ animation: "splashIris .9s cubic-bezier(.2,.7,.2,1) both" }}>
-            <Logo size={550} glow />
+          <div
+            style={{ animation: "splashIris .9s cubic-bezier(.2,.7,.2,1) both" }}
+            className="[--splash-logo:220px] sm:[--splash-logo:320px] md:[--splash-logo:420px] lg:[--splash-logo:520px]"
+          >
+            <div style={{ width: "var(--splash-logo)", height: "var(--splash-logo)" }}>
+              <Logo size={520} glow className="!w-full !h-full [&>img]:!w-full [&>img]:!h-full" />
+            </div>
           </div>
         </div>
 
