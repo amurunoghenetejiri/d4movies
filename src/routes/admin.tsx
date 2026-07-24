@@ -169,7 +169,7 @@ function MoviesAdmin() {
 
   const toggle = useMutation({
     mutationFn: async ({ id, field, value }: { id: string; field: string; value: boolean }) => {
-      const { error } = await supabase.from("movies").update({ [field]: value }).eq("id", id);
+      const { error } = await supabase.from("movies").update({ [field]: value } as any).eq("id", id);
       if (error) throw error;
     },
     onSuccess: (_, v) => {
