@@ -317,7 +317,7 @@ function Watch() {
             </div>
           )}
 
-          <div className={`absolute inset-x-0 top-0 p-3 md:p-6 flex items-center justify-between transition-opacity duration-500 ${showUI ? "opacity-100" : "opacity-0"}`}>
+          <div className={`absolute inset-x-0 top-2 px-3 py-1 md:p-6 flex items-center justify-between transition-opacity duration-500 ${showUI ? "opacity-100" : "opacity-0"}`}>
             <div className="flex items-center gap-2 md:gap-3 min-w-0">
               <Button size="icon" variant="ghost" className="rounded-full shrink-0" onClick={() => nav({ to: "/movie/$id", params: { id: m.id } })} aria-label="Back"><ArrowLeft /></Button>
               <div className="min-w-0">
@@ -336,7 +336,7 @@ function Watch() {
             </button>
           )}
 
-          <div className={`absolute inset-x-0 bottom-0 p-2 md:p-6 transition-opacity duration-500 ${showUI ? "opacity-100" : "opacity-0"}`}>
+          <div className={`absolute inset-x-0 bottom-1 px-2 py-1 md:p-6 transition-opacity duration-500 ${showUI ? "opacity-100" : "opacity-0"}`}>
             <div className="flex items-center gap-2 text-[10px] md:text-xs mb-1 md:mb-2">
               <span>{fmt(cur)}</span>
               <input
