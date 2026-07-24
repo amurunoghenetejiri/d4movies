@@ -264,7 +264,7 @@ function Watch() {
       <div className="sticky top-0 z-40 bg-black">
         <div
           ref={containerRef}
-          className="relative aspect-video max-h-[85vh] md:max-h-[95vh] w-full bg-black overflow-hidden select-none"
+          className="relative aspect-video max-h-[80vh] md:max-h-[85vh] w-full bg-black overflow-hidden select-none"
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
