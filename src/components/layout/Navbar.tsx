@@ -70,7 +70,7 @@ export function Navbar() {
         <div className="mx-auto flex h-12 md:h-14 max-w-7xl items-center justify-between gap-3 px-3 md:px-6">
           <Link to="/" className="flex items-center gap-2 shrink-0">
             <Logo size={87} className="md:hidden" />
-            <Logo size={130} className="hidden md:flex" />
+            <Logo size={140} className="hidden md:flex" />
           </Link>
 
           <nav className="hidden lg:flex items-center gap-1">
