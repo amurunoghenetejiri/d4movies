@@ -14,7 +14,7 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 
 export function MovieCard({ m, size = "md" }: { m: Movie; size?: "sm" | "md" | "lg" }) {
-  const width = size === "lg" ? "w-48 md:w-56" : size === "sm" ? "w-28 md:w-32" : "w-32 md:w-40";
+  const width = size === "lg" ? "w-48 md:w-80" : size === "sm" ? "w-28 md:w-56" : "w-32 md:w-64";
   const { user } = useAuth();
   const inWatch = useIsInWatchlist(m.dbId);
   const inFav = useIsFavorite(m.dbId);
