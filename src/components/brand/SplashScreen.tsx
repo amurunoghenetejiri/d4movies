@@ -16,8 +16,8 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
 
   useEffect(() => {
     const skipT = setTimeout(() => setCanSkip(true), 3000);
-    const outT = setTimeout(() => setLeaving(true), 7200);
-    const doneT = setTimeout(onDone, 7900);
+    const outT = setTimeout(() => setLeaving(true), 8300);
+    const doneT = setTimeout(onDone, 9000);
     return () => { clearTimeout(skipT); clearTimeout(outT); clearTimeout(doneT); };
   }, [onDone]);
 
