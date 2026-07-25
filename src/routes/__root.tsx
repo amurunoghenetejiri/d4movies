@@ -77,17 +77,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "D4TECH Movies — Stream. Discover. Enjoy." },
+      { title: "D4MOVIES — Stream. Discover. Enjoy." },
       {
         name: "description",
         content:
           "D4TECH Movies is a premium streaming platform to watch and download movies, TV series, anime, Nollywood, Bollywood, Hollywood, Korean and Chinese dramas in HD & 4K.",
       },
-      { name: "author", content: "D4TECH Movies" },
-      { name: "theme-color", content: "#00C853" },
-      { property: "og:title", content: "D4TECH Movies — Stream. Discover. Enjoy." },
+      { name: "author", content: "D4MOVIES" },
+      { name: "theme-color", content: "#090909" },
+      { property: "og:title", content: "D4MOVIES — Stream. Discover. Enjoy." },
       { property: "og:description", content: "Premium streaming for movies, series, anime and dramas from around the world." },
-      { property: "og:site_name", content: "D4TECH Movies" },
+      { property: "og:site_name", content: "D4MOVIES" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@D4TECHMovies" },
