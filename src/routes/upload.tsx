@@ -302,14 +302,11 @@ function UploadPage() {
         </div>
 
         {/* Files */}
+        {externalRef && (
         <div className="grid md:grid-cols-2 gap-4">
           <FileDrop label="Movie file" accept="video/*" hint="MP4 / WebM / MOV — streams privately" slot={slots.movie} job={jobFor("movie")} onFile={(f) => startUpload("movie", "movies", "movie", f)} onCancel={() => cancelSlot("movie")} />
-          <FileDrop label="Trailer" accept="video/*" hint={trailerYt ? "Auto-attached from search. Upload to override." : "Short preview clip"} slot={slots.trailer} job={jobFor("trailer")} onFile={(f) => startUpload("trailer", "trailers", "trailer", f)} onCancel={() => cancelSlot("trailer")} />
-          <FileDrop label="Poster" accept="image/*" hint={posterOverride ? "Auto-attached. Upload to override." : "2:3 portrait"} slot={slots.poster} job={jobFor("poster")} onFile={(f) => startUpload("poster", "posters", "poster", f)} onCancel={() => cancelSlot("poster")} />
-          <FileDrop label="Backdrop" accept="image/*" hint={backdropOverride ? "Auto-attached. Upload to override." : "16:9 landscape"} slot={slots.backdrop} job={jobFor("backdrop")} onFile={(f) => startUpload("backdrop", "backdrops", "backdrop", f)} onCancel={() => cancelSlot("backdrop")} />
-          <FileDrop label="Subtitles" accept=".vtt,.srt" hint=".vtt or .srt" slot={slots.subtitle} job={jobFor("subtitle")} onFile={(f) => startUpload("subtitle", "subtitles", "subtitle", f)} onCancel={() => cancelSlot("subtitle")} />
-          <FileDrop label="Thumbnail" accept="image/*" hint="Optional 1280×720" slot={slots.thumbnail} job={jobFor("thumbnail")} onFile={(f) => startUpload("thumbnail", "thumbnails", "thumbnail", f)} onCancel={() => cancelSlot("thumbnail")} />
-        </div>
+          </div>
+        )}
 
         {/* Metadata */}
         <div className="glass rounded-3xl p-5 md:p-6 grid md:grid-cols-2 gap-4">
