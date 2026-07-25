@@ -16,6 +16,9 @@ import { Toaster } from "@/components/ui/sonner";
 import { SplashScreen } from "@/components/brand/SplashScreen";
 import { AuthProvider } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { FloatingUploadDock } from "@/components/upload/FloatingUploadDock";
+import { InstallPrompt } from "@/components/pwa/InstallPrompt";
+import { UploadManagerProvider } from "@/lib/upload-manager";
 
 function NotFoundComponent() {
   return (
@@ -148,31 +151,35 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        {splash && <SplashScreen onDone={() => setSplash(false)} />}
-        <Outlet />
-        <Toaster
-          position="top-right"
-          theme="dark"
-          richColors
-          closeButton
-          expand
-          duration={4000}
-          toastOptions={{
-            classNames: {
-              toast:
-                "!bg-white/[0.06] !backdrop-blur-xl !border !border-white/10 !text-foreground !rounded-2xl !shadow-2xl",
-              title: "!font-semibold",
-              description: "!text-muted-foreground",
-              actionButton: "!bg-primary !text-primary-foreground !rounded-full",
-              cancelButton: "!bg-white/10 !text-foreground !rounded-full",
-              closeButton: "!bg-white/10 !border-white/10 !text-foreground",
-              success: "!border-primary/40",
-              error: "!border-destructive/50",
-              warning: "!border-gold/50",
-              info: "!border-white/20",
-            },
-          }}
-        />
+        <UploadManagerProvider>
+          {splash && <SplashScreen onDone={() => setSplash(false)} />}
+          <Outlet />
+          <FloatingUploadDock />
+          <InstallPrompt />
+          <Toaster
+            position="top-right"
+            theme="dark"
+            richColors
+            closeButton
+            expand
+            duration={4000}
+            toastOptions={{
+              classNames: {
+                toast:
+                  "!bg-white/[0.06] !backdrop-blur-xl !border !border-white/10 !text-foreground !rounded-2xl !shadow-2xl",
+                title: "!font-semibold",
+                description: "!text-muted-foreground",
+                actionButton: "!bg-primary !text-primary-foreground !rounded-full",
+                cancelButton: "!bg-white/10 !text-foreground !rounded-full",
+                closeButton: "!bg-white/10 !border-white/10 !text-foreground",
+                success: "!border-primary/40",
+                error: "!border-destructive/50",
+                warning: "!border-gold/50",
+                info: "!border-white/20",
+              },
+            }}
+          />
+        </UploadManagerProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
