@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { UploadCloud, X, RefreshCw, Loader2, CheckCircle2, Search as SearchIcon, Sparkles, Pause, Play } from "lucide-react";
+import { UploadCloud, X, RefreshCw, Loader2, CheckCircle2, Search as SearchIcon, film, Pause, Play } from "lucide-react";
 import { useTmdbSearch, useTmdbDetail, tmdbPoster, tmdbBackdrop, tmdbYouTubeKey, type TmdbItem } from "@/lib/tmdb";
 import { uploadManager, useUploadManager, formatBytes, formatEta } from "@/lib/upload-manager";
 import type { BucketName } from "@/lib/uploads";
@@ -237,7 +237,7 @@ function UploadPage() {
         {/* Smart search */}
         <div className="glass-strong rounded-3xl p-4 md:p-5">
           <div className="flex items-center gap-2 text-sm font-semibold mb-2">
-            <Sparkles className="size-4 text-gold" />
+            <Film className="size-4 text-primary" />
             Search a title to auto-fill everything
           </div>
           <div className="relative">
