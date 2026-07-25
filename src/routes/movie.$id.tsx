@@ -101,7 +101,7 @@ function MovieHero({ m }: { m: import("@/lib/movies").Movie }) {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/40" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/50 to-transparent" />
       </div>
-      <div className="mx-auto max-w-7xl px-4 md:px-6 pt-28 md:pt-36 pb-10 grid md:grid-cols-[280px_1fr] gap-8 items-end">
+      <div className="mx-auto max-w-7xl px-4 md:px-6 pt-12 md:pt-36 pb-4 grid md:grid-cols-[280px_1fr] gap-6 items-end">
         <img src={m.poster} alt={m.title} className="w-48 md:w-full rounded-2xl border border-border shadow-2xl" />
         <div className="animate-fade-up">
           <span className="text-xs uppercase tracking-widest text-primary font-semibold">{m.category}</span>
@@ -113,8 +113,8 @@ function MovieHero({ m }: { m: import("@/lib/movies").Movie }) {
             <span className="rounded-full glass px-2 py-0.5 text-[11px] font-semibold">{m.quality}</span>
             {m.genres.map((g) => <span key={g} className="rounded-full glass px-2 py-0.5 text-xs">{g}</span>)}
           </div>
-          <p className="mt-4 max-w-2xl text-muted-foreground">{m.description}</p>
-          <div className="mt-6 flex flex-wrap gap-2">
+          <p className="mt-2 max-w-2xl text-muted-foreground">{m.description}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
             <Button asChild size="lg" className="rounded-full glow-emerald"><Link to="/watch/$id" params={{ id: m.id }}><Play className="fill-current" />Watch Now</Link></Button>
             <Button size="lg" variant="secondary" className="rounded-full" onClick={() => { if (m.trailerUrl) setShowTrailer(true); else toast("No trailer available"); }}><PlayCircle />Trailer</Button>
             <Button size="lg" variant="ghost" className="rounded-full" disabled={!user} onClick={() => user && queueDl.mutate(m.dbId)}><Download />Download</Button>
@@ -129,7 +129,7 @@ function MovieHero({ m }: { m: import("@/lib/movies").Movie }) {
             <Button size="lg" variant="ghost" className="rounded-full" onClick={share}><Share2 /></Button>
           </div>
 
-          <div className="mt-4 flex items-center gap-2 text-sm">
+          <div className="mt-2 flex items-center gap-2 text-sm">
             <Button
               size="sm" variant="ghost" className="rounded-full"
               onClick={() => requireAuth() && setLike.mutate({ movieDbId: m.dbId, value: myLike.data === 1 ? 0 : 1 })}
@@ -154,14 +154,14 @@ function MovieHero({ m }: { m: import("@/lib/movies").Movie }) {
             </Button>
           </div>
 
-          <dl className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+          <dl className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
             <Meta label="Director" value={m.director} />
             <Meta label="Country" value={m.country} />
             <Meta label="Language" value={m.language} />
             <Meta label="Year" value={String(m.year)} />
           </dl>
           {m.cast.length > 0 && (
-            <div className="mt-4">
+            <div className="mt-2">
               <div className="text-xs uppercase tracking-widest text-muted-foreground">Cast</div>
               <div className="mt-2 flex flex-wrap gap-2">
                 {m.cast.map((c) => <span key={c} className="rounded-full glass px-3 py-1 text-xs">{c}</span>)}
