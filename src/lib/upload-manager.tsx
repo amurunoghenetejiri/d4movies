@@ -234,7 +234,12 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
 export function useUploadManager() {
   const m = useContext(Ctx) ?? uploadManager;
   const [, force] = useState(0);
-  useEffect(() => m.subscribe(() => force((n) => n + 1)), [m]);
+  useEffect(() => {
+    const unsub = m.subscribe(() => force((n) => n + 1));
+    return () => {
+      unsub();
+    };
+  }, [m]);
   return m;
 }
 
