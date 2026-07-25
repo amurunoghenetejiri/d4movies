@@ -317,11 +317,11 @@ function Watch() {
             </div>
           )}
 
-          <div className={`absolute inset-x-0 top-2 px-3 py-1 md:p-6 flex items-center justify-between transition-opacity duration-500 ${showUI ? "opacity-100" : "opacity-0"}`}>
+          <div className={`absolute inset-x-0 top-0 px-3 pt-1 pb-0 md:p-6 flex items-center justify-between transition-opacity duration-500 ${showUI ? "opacity-100" : "opacity-0"}`}>
             <div className="flex items-center gap-2 md:gap-3 min-w-0">
               <Button size="icon" variant="ghost" className="rounded-full shrink-0" onClick={() => nav({ to: "/movie/$id", params: { id: m.id } })} aria-label="Back"><ArrowLeft /></Button>
               <div className="min-w-0">
-                <div className="text-[10px] md:text-sm text-muted-foreground">Now playing</div>
+                <div className="text-[9px] md:text-sm text-muted-foreground">Now playing</div>
                 <div className="font-semibold text-sm md:text-base truncate">{m.title}</div>
               </div>
             </div>
@@ -330,13 +330,13 @@ function Watch() {
 
           {!playing && m.movieUrl && (
             <button onClick={togglePlay} className="absolute inset-0 grid place-items-center">
-              <div className="grid place-items-center size-20 md:size-24 rounded-full bg-primary/95 text-primary-foreground glow-emerald">
-                <Play className="size-8 md:size-10 fill-current" />
+              <div className="grid place-items-center size-19 md:size-24 rounded-full bg-primary/95 text-primary-foreground glow-emerald">
+                <Play className="size-7 md:size-10 fill-current" />
               </div>
             </button>
           )}
 
-          <div className={`absolute inset-x-0 bottom-1 px-2 py-1 md:p-6 transition-opacity duration-500 ${showUI ? "opacity-100" : "opacity-0"}`}>
+          <div className={`absolute inset-x-0 bottom-0 px-2 pt-0 pb-0 md:p-6 transition-opacity duration-500 ${showUI ? "opacity-100" : "opacity-0"}`}>
             <div className="flex items-center gap-2 text-[10px] md:text-xs mb-1 md:mb-2">
               <span>{fmt(cur)}</span>
               <input
