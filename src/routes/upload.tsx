@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { UploadCloud, X, RefreshCw, Loader2, CheckCircle2, Search as SearchIcon, film, Pause, Play } from "lucide-react";
+import { UploadCloud, X, RefreshCw, Loader2, CheckCircle2, Search as SearchIcon, Film, Pause, Play } from "lucide-react";
 import { useTmdbSearch, useTmdbDetail, tmdbPoster, tmdbBackdrop, tmdbYouTubeKey, type TmdbItem } from "@/lib/tmdb";
 import { uploadManager, useUploadManager, formatBytes, formatEta } from "@/lib/upload-manager";
 import type { BucketName } from "@/lib/uploads";
