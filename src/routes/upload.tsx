@@ -258,7 +258,7 @@ function UploadPage() {
               )}
             </div>
             {searchOpen && debounced.length >= 2 && results.length > 0 && (
-              <div className="absolute z-30 left-0 right-0 mt-2 rounded-2xl glass-strong border border-white/10 shadow-2xl overflow-hidden max-h-[60vh] overflow-y-auto">
+              <div className="fixed z-[9999] left-4 right-4 top-44 md:left-auto md:right-auto md:w-[650px] rounded-2xl glass-strong border border-white/10 shadow-2xl overflow-hidden max-h-[60vh] overflow-y-auto">
                 {results.map((r) => {
                   const t = r.title ?? (r as unknown as { name?: string }).name ?? "Untitled";
                   const date = r.release_date ?? r.first_air_date ?? "";
@@ -300,13 +300,14 @@ function UploadPage() {
             </div>
           )}
         </div>
-
-        {/* Files */}
-        {externalRef && (
+        
+{externalRef && (
+  <>
+    {/* Files */}
         <div className="grid md:grid-cols-2 gap-4">
           <FileDrop label="Movie file" accept="video/*" hint="MP4 / WebM / MOV — streams privately" slot={slots.movie} job={jobFor("movie")} onFile={(f) => startUpload("movie", "movies", "movie", f)} onCancel={() => cancelSlot("movie")} />
           </div>
-        )}
+        
 
         {/* Metadata */}
         <div className="glass rounded-3xl p-5 md:p-6 grid md:grid-cols-2 gap-4">
@@ -352,6 +353,8 @@ function UploadPage() {
         <p className="text-center text-xs text-muted-foreground">
           Uploads continue in the background — feel free to browse other pages.
         </p>
+          </>
+        )}
       </div>
     </AppShell>
   );
