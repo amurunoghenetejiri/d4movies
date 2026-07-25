@@ -258,8 +258,8 @@ function UploadPage() {
               )}
             </div>
             {searchOpen && debounced.length >= 2 && results.length > 0 && (
-              <div className="fixed z-[9999] left-4 right-4 top-44 md:left-auto md:right-auto md:w-[650px] rounded-2xl glass-strong border border-white/10 shadow-2xl overflow-hidden max-h-[60vh] overflow-y-auto">
-                {results.map((r) => {
+               <div className="mt-2 rounded-2xl glass-strong border border-white/10 shadow-2xl overflow-hidden max-h-[420px] overflow-y-auto">
+            {results.map((r) => {
                   const t = r.title ?? (r as unknown as { name?: string }).name ?? "Untitled";
                   const date = r.release_date ?? r.first_air_date ?? "";
                   return (
