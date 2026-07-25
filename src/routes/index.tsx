@@ -16,9 +16,9 @@ import { Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "D4STREAMS — Stream. Discover. Enjoy." },
+      { title: "D4MOVIES — Stream. Discover. Enjoy." },
       { name: "description", content: "Premium streaming for movies, TV series, anime and world dramas in HD & 4K on D4STREAMS." },
-      { property: "og:title", content: "D4STREAMS — Stream. Discover. Enjoy." },
+      { property: "og:title", content: "D4MOVIES — Stream. Discover. Enjoy." },
       { property: "og:description", content: "Trending, top-rated, and freshly uploaded movies across every genre." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "/" },
