@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { PLACEHOLDER_BACKDROP, PLACEHOLDER_POSTER } from "./placeholders";
 
 export const TMDB_KEY = (import.meta.env.VITE_TMDB_API_KEY as string | undefined) ?? "";
@@ -9,7 +9,8 @@ export const tmdbPoster = (p: string | null, size: "w342" | "w500" | "original" 
   p ? `${IMG}/${size}${p}` : PLACEHOLDER_POSTER;
 export const tmdbBackdrop = (p: string | null, size: "w780" | "w1280" | "original" = "w1280") =>
   p ? `${IMG}/${size}${p}` : PLACEHOLDER_BACKDROP;
-
+export const tmdbProfile = (p: string | null, size: "w185" | "h632" = "w185") =>
+  p ? `${IMG}/${size}${p}` : "";
 
 export type TmdbItem = {
   id: number;
@@ -53,6 +54,24 @@ export const useTmdbTvPopular = () => useQuery(list("/tv/popular"));
 export const useTmdbByGenre = (genreId: number) =>
   useQuery(list("/discover/movie", { with_genres: genreId, sort_by: "popularity.desc" }));
 
+/** Infinite paginated discovery — used for the home page endless feed. */
+export function useTmdbInfiniteDiscover() {
+  return useInfiniteQuery({
+    queryKey: ["tmdb", "infinite", "discover"],
+    initialPageParam: 1,
+    queryFn: async ({ pageParam }) => {
+      const d = await tmdbFetch<{ results: TmdbItem[]; page: number; total_pages: number }>(
+        "/discover/movie",
+        { sort_by: "popularity.desc", page: pageParam as number, "vote_count.gte": 50 },
+      );
+      return d;
+    },
+    getNextPageParam: (last) => (last.page < Math.min(last.total_pages, 500) ? last.page + 1 : undefined),
+    enabled: TMDB_ENABLED,
+    staleTime: 5 * 60_000,
+  });
+}
+
 // Common TMDb genre IDs
 export const TMDB_GENRES = {
   Action: 28, Adventure: 12, Animation: 16, Comedy: 35, Crime: 80,
@@ -68,10 +87,11 @@ export type TmdbDetail = TmdbItem & {
   original_language: string;
   original_title: string;
   production_countries: { name: string }[];
+  spoken_languages?: { english_name: string; name: string }[];
   videos?: { results: { key: string; site: string; type: string; official: boolean }[] };
   credits?: {
-    cast: { name: string; character: string; profile_path: string | null }[];
-    crew: { name: string; job: string }[];
+    cast: { id: number; name: string; character: string; profile_path: string | null; order?: number }[];
+    crew: { id: number; name: string; job: string; department: string; profile_path: string | null }[];
   };
 };
 
@@ -110,4 +130,15 @@ export function tmdbYouTubeKey(detail: TmdbDetail | undefined): string | null {
   const yt = vids.filter((v) => v.site === "YouTube");
   const trailer = yt.find((v) => v.type === "Trailer" && v.official) ?? yt.find((v) => v.type === "Trailer") ?? yt[0];
   return trailer?.key ?? null;
+}
+
+/** Extract common crew roles from TMDb credits. */
+export function extractCrew(detail: TmdbDetail | undefined) {
+  const crew = detail?.credits?.crew ?? [];
+  const byJob = (job: string) => crew.filter((c) => c.job === job).map((c) => c.name);
+  return {
+    directors: byJob("Director"),
+    writers: [...new Set([...byJob("Writer"), ...byJob("Screenplay"), ...byJob("Story")])],
+    producers: byJob("Producer"),
+  };
 }

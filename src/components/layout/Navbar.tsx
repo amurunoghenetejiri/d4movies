@@ -1,10 +1,9 @@
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
-import { Bell, Search, User, Menu, X, Home, Film, Tv, UserCircle, TrendingUp, LogOut, Settings as SettingsIcon, Shield, Heart, Bookmark, Clock, Download, UploadCloud } from "lucide-react";
+import { Search, User, Menu, X, Home, Film, Tv, UserCircle, TrendingUp, LogOut, Settings as SettingsIcon, Shield, Heart, Bookmark, Clock, Download, UploadCloud } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Logo } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
-import { useNotifications, useMarkNotificationRead } from "@/lib/user-data";
 import { toast } from "sonner";
 
 const links = [
@@ -21,14 +20,10 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [notifOpen, setNotifOpen] = useState(false);
   const router = useRouter();
   const nav = useNavigate();
   const { user, profile, isAdmin, signOut } = useAuth();
-  const notifQ = useNotifications();
-  const markRead = useMarkNotificationRead();
   const menuRef = useRef<HTMLDivElement>(null);
-  const notifRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -38,14 +33,13 @@ export function Navbar() {
   }, []);
 
   useEffect(() => {
-    const unsub = router.subscribe("onResolved", () => { setOpen(false); setMenuOpen(false); setNotifOpen(false); });
+    const unsub = router.subscribe("onResolved", () => { setOpen(false); setMenuOpen(false); });
     return unsub;
   }, [router]);
 
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false);
     };
     document.addEventListener("mousedown", onDoc);
     return () => document.removeEventListener("mousedown", onDoc);
@@ -57,7 +51,6 @@ export function Navbar() {
     nav({ to: "/" });
   };
 
-  const unread = (notifQ.data ?? []).filter((n: any) => !n.read).length;
   const initials = (profile?.full_name ?? profile?.username ?? user?.email ?? "D4")[0]?.toUpperCase();
 
   return (
@@ -87,43 +80,12 @@ export function Navbar() {
           </nav>
 
           <div className="flex items-center gap-1 md:gap-2">
+            {/* Search */}
             <Button asChild variant="ghost" size="icon" className="rounded-full">
               <Link to="/search" aria-label="Search"><Search className="size-5" /></Link>
             </Button>
-            <Button asChild size="sm" variant="ghost" className="hidden md:inline-flex rounded-full gap-1.5">
-              <Link to="/upload"><UploadCloud className="size-4" /> Upload</Link>
-            </Button>
 
-            {user && (
-              <div className="relative" ref={notifRef}>
-                <Button variant="ghost" size="icon" className="rounded-full relative" aria-label="Notifications" onClick={() => setNotifOpen((v) => !v)}>
-                  <Bell className="size-5" />
-                  {unread > 0 && <span className="absolute top-1 right-1 size-2 rounded-full bg-primary" />}
-                </Button>
-                {notifOpen && (
-                  <div className="absolute right-0 top-12 w-80 glass-strong rounded-2xl p-3 z-[70]">
-                    <div className="text-xs uppercase tracking-widest text-muted-foreground px-2 py-1">Notifications</div>
-                    <div className="max-h-80 overflow-y-auto space-y-1 mt-1">
-                      {(notifQ.data ?? []).length === 0 && (
-                        <p className="text-sm text-muted-foreground p-3 text-center">You're all caught up.</p>
-                      )}
-                      {(notifQ.data ?? []).map((n: any) => (
-                        <button
-                          key={n.id}
-                          onClick={() => markRead.mutate(n.id)}
-                          className={`w-full text-left rounded-xl p-3 hover:bg-white/5 ${n.read ? "opacity-60" : ""}`}
-                        >
-                          <div className="text-sm font-semibold">{n.title}</div>
-                          {n.body && <div className="text-xs text-muted-foreground">{n.body}</div>}
-                          <div className="text-[10px] text-muted-foreground mt-1">{new Date(n.created_at).toLocaleString()}</div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
+            {/* Profile */}
             {user ? (
               <div className="relative" ref={menuRef}>
                 <button
@@ -161,17 +123,13 @@ export function Navbar() {
                 )}
               </div>
             ) : (
-              <>
-                <Button asChild size="sm" className="hidden md:inline-flex rounded-full">
-                  <Link to="/register">Sign up</Link>
-                </Button>
-                <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex rounded-full">
-                  <Link to="/login">Login</Link>
-                </Button>
-              </>
+              <Button asChild variant="ghost" size="icon" className="rounded-full" aria-label="Sign in">
+                <Link to="/login"><UserCircle className="size-5" /></Link>
+              </Button>
             )}
 
-            <Button variant="ghost" size="icon" className="rounded-full lg:hidden" onClick={() => setOpen(true)} aria-label="Menu">
+            {/* Menu */}
+            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setOpen(true)} aria-label="Menu">
               <Menu className="size-5" />
             </Button>
           </div>
@@ -179,7 +137,7 @@ export function Navbar() {
       </header>
 
       {open && (
-        <div className="fixed inset-0 z-[60] lg:hidden">
+        <div className="fixed inset-0 z-[60]">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={() => setOpen(false)} />
           <div className="absolute right-0 top-0 h-full w-[82%] max-w-sm glass-strong p-5 flex flex-col gap-1 animate-zoom-soft overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
@@ -197,8 +155,10 @@ export function Navbar() {
             {user ? (
               <>
                 <Link to="/profile" className="rounded-lg px-3 py-3 text-base hover:bg-white/5">Profile</Link>
+                <Link to="/upload" className="rounded-lg px-3 py-3 text-base hover:bg-white/5">Upload</Link>
                 <Link to="/watchlist" className="rounded-lg px-3 py-3 text-base hover:bg-white/5">Watchlist</Link>
                 <Link to="/favorites" className="rounded-lg px-3 py-3 text-base hover:bg-white/5">Favorites</Link>
+                <Link to="/history" className="rounded-lg px-3 py-3 text-base hover:bg-white/5">History</Link>
                 <Link to="/downloads" className="rounded-lg px-3 py-3 text-base hover:bg-white/5">Downloads</Link>
                 <Link to="/settings" className="rounded-lg px-3 py-3 text-base hover:bg-white/5">Settings</Link>
                 {isAdmin && <Link to="/admin" className="rounded-lg px-3 py-3 text-base hover:bg-white/5">Admin</Link>}
