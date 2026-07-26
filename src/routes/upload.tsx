@@ -211,6 +211,8 @@ function UploadPage() {
         age_rating: ageRating,
         tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
         created_by: user.id,
+        tmdb_id: externalRef?.media_type === "movie" ? externalRef.id : null,
+        writers,
       })
       .select("id, slug")
       .single();
@@ -231,7 +233,10 @@ function UploadPage() {
     nav({ to: "/movie/$id", params: { id: inserted.slug } });
   };
 
-  const results = (search.data ?? []).filter((r) => r.media_type === "movie" || r.media_type === "tv").slice(0, 8);
+  const results = (search.data ?? [])
+    .filter((r) => (r.media_type === "movie" || r.media_type === "tv") && !uploadedTmdb.has(r.id))
+    .slice(0, 8);
+
 
   return (
     <AppShell>
