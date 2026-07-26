@@ -11,8 +11,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { UploadCloud, X, RefreshCw, Loader2, CheckCircle2, Search as SearchIcon, Film, Pause, Play } from "lucide-react";
-import { useTmdbSearch, useTmdbDetail, tmdbPoster, tmdbBackdrop, tmdbYouTubeKey, type TmdbItem } from "@/lib/tmdb";
+import { useTmdbSearch, useTmdbDetail, tmdbPoster, tmdbBackdrop, tmdbYouTubeKey, extractCrew, type TmdbItem } from "@/lib/tmdb";
 import { uploadManager, useUploadManager, formatBytes, formatEta } from "@/lib/upload-manager";
+import { useUploadedByTmdb } from "@/lib/movies";
 import type { BucketName } from "@/lib/uploads";
 
 export const Route = createFileRoute("/upload")({
@@ -57,6 +58,8 @@ function UploadPage() {
   const [posterOverride, setPosterOverride] = useState<string | null>(null);
   const [backdropOverride, setBackdropOverride] = useState<string | null>(null);
   const [trailerYt, setTrailerYt] = useState<string | null>(null);
+  const [writers, setWriters] = useState<string[]>([]);
+  const uploadedTmdb = useUploadedByTmdb();
   const [submitting, setSubmitting] = useState(false);
 
   const [slots, setSlots] = useState<Record<SlotKey, Slot>>({
@@ -91,11 +94,11 @@ function UploadPage() {
     setYear(Number((d.release_date ?? "").slice(0, 4)) || year);
     setDuration(d.runtime || duration);
     setGenres((d.genres ?? []).map((g) => g.name).join(", "));
-    setCast((d.credits?.cast ?? []).slice(0, 10).map((c) => c.name).join(", "));
-    const dir = (d.credits?.crew ?? []).find((c) => c.job === "Director");
-    if (dir) setDirector(dir.name);
-    const prod = (d.credits?.crew ?? []).find((c) => c.job === "Producer");
-    if (prod) setProducer(prod.name);
+    setCast((d.credits?.cast ?? []).slice(0, 15).map((c) => c.name).join(", "));
+    const crew = extractCrew(d);
+    if (crew.directors[0]) setDirector(crew.directors[0]);
+    if (crew.producers[0]) setProducer(crew.producers[0]);
+    setWriters(crew.writers);
     setPosterOverride(tmdbPoster(d.poster_path, "w500"));
     setBackdropOverride(tmdbBackdrop(d.backdrop_path, "w1280"));
     const yt = tmdbYouTubeKey(d);
@@ -103,6 +106,10 @@ function UploadPage() {
   }, [detail.data]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const pickResult = (item: TmdbItem) => {
+    if (uploadedTmdb.has(item.id)) {
+      toast.error("This title is already on D4MOVIES.");
+      return;
+    }
     const t = item.title ?? (item as unknown as { name?: string }).name ?? "";
     setTitle(t);
     setQuery(t);
