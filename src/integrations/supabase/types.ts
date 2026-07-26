@@ -262,11 +262,13 @@ export type Database = {
           tags: string[]
           thumbnail: string | null
           title: string
+          tmdb_id: number | null
           top_rated: boolean
           trailer_url: string | null
           trending: boolean
           updated_at: string
           views: number
+          writers: string[]
         }
         Insert: {
           actors?: string[]
@@ -298,11 +300,13 @@ export type Database = {
           tags?: string[]
           thumbnail?: string | null
           title: string
+          tmdb_id?: number | null
           top_rated?: boolean
           trailer_url?: string | null
           trending?: boolean
           updated_at?: string
           views?: number
+          writers?: string[]
         }
         Update: {
           actors?: string[]
@@ -334,11 +338,13 @@ export type Database = {
           tags?: string[]
           thumbnail?: string | null
           title?: string
+          tmdb_id?: number | null
           top_rated?: boolean
           trailer_url?: string | null
           trending?: boolean
           updated_at?: string
           views?: number
+          writers?: string[]
         }
         Relationships: []
       }
