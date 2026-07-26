@@ -29,6 +29,7 @@ export type Movie = {
   description: string;
   director: string;
   cast: string[];
+  writers?: string[];
   poster: string;
   backdrop: string;
   trending?: boolean;
@@ -46,6 +47,7 @@ export type Movie = {
   isHidden?: boolean;
   isPinned?: boolean;
   createdBy?: string | null;
+  tmdbId?: number | null;
 };
 
 type MovieRow = {
@@ -75,6 +77,7 @@ type MovieRow = {
 };
 
 export function mapMovie(r: MovieRow): Movie {
+  const raw = r as any;
   return {
     id: r.slug,
     dbId: r.id,
@@ -91,6 +94,7 @@ export function mapMovie(r: MovieRow): Movie {
     description: r.description ?? "",
     director: r.director ?? "—",
     cast: r.actors ?? [],
+    writers: raw.writers ?? [],
     poster: r.poster ?? PLACEHOLDER_POSTER,
     backdrop: r.backdrop ?? PLACEHOLDER_BACKDROP,
 
@@ -100,15 +104,16 @@ export function mapMovie(r: MovieRow): Movie {
     comingSoon: r.coming_soon,
     trailerUrl: r.trailer_url ?? undefined,
     movieUrl: r.movie_url ?? undefined,
-    subtitleUrl: (r as any).subtitle_url ?? undefined,
-    thumbnail: (r as any).thumbnail ?? undefined,
-    originalTitle: (r as any).original_title ?? undefined,
-    producer: (r as any).producer ?? undefined,
-    ageRating: (r as any).age_rating ?? undefined,
-    tags: (r as any).tags ?? [],
-    isHidden: (r as any).is_hidden ?? false,
-    isPinned: (r as any).is_pinned ?? false,
+    subtitleUrl: raw.subtitle_url ?? undefined,
+    thumbnail: raw.thumbnail ?? undefined,
+    originalTitle: raw.original_title ?? undefined,
+    producer: raw.producer ?? undefined,
+    ageRating: raw.age_rating ?? undefined,
+    tags: raw.tags ?? [],
+    isHidden: raw.is_hidden ?? false,
+    isPinned: raw.is_pinned ?? false,
     createdBy: r.created_by,
+    tmdbId: raw.tmdb_id ?? null,
   };
 }
 
@@ -134,6 +139,16 @@ export function useAllMovies(): Movie[] {
 export function useMovieBySlug(slug: string | undefined): Movie | undefined {
   const list = useAllMovies();
   return useMemo(() => list.find((m) => m.id === slug), [list, slug]);
+}
+
+/** Fast lookup of TMDb id -> uploaded movie (used for dedupe + routing). */
+export function useUploadedByTmdb(): Map<number, Movie> {
+  const list = useAllMovies();
+  return useMemo(() => {
+    const m = new Map<number, Movie>();
+    for (const mv of list) if (mv.tmdbId != null) m.set(mv.tmdbId, mv);
+    return m;
+  }, [list]);
 }
 
 export function useGenres(): string[] {
