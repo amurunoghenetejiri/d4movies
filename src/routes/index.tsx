@@ -1,17 +1,20 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useMemo, useRef } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { HeroCarousel } from "@/components/movies/HeroCarousel";
 import { MovieRow } from "@/components/movies/MovieRow";
 import { TmdbRow } from "@/components/movies/TmdbRow";
-import { useAllMovies } from "@/lib/movies";
+import { TmdbCard } from "@/components/movies/TmdbCard";
+import { useAllMovies, useUploadedByTmdb } from "@/lib/movies";
 import { useHistory } from "@/lib/user-data";
 import { useAuth } from "@/hooks/use-auth";
 import {
   TMDB_ENABLED, TMDB_GENRES,
   useTmdbNowPlaying, useTmdbPopular, useTmdbTopRated, useTmdbTrending,
   useTmdbTvPopular, useTmdbUpcoming, useTmdbByGenre,
+  useTmdbInfiniteDiscover,
+  type TmdbItem,
 } from "@/lib/tmdb";
-import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -47,11 +50,38 @@ function Home() {
   const horror = useTmdbByGenre(TMDB_GENRES.Horror);
   const romance = useTmdbByGenre(TMDB_GENRES.Romance);
   const animation = useTmdbByGenre(TMDB_GENRES.Animation);
-  const crime = useTmdbByGenre(TMDB_GENRES.Crime);
-  const sciFi = useTmdbByGenre(TMDB_GENRES["Sci-Fi"]);
-  const thriller = useTmdbByGenre(TMDB_GENRES.Thriller);
 
-  // Hero: prefer TMDb trending; fall back to any uploaded movie
+  // Infinite discovery feed
+  const infinite = useTmdbInfiniteDiscover();
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node) return;
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && infinite.hasNextPage && !infinite.isFetchingNextPage) {
+        infinite.fetchNextPage();
+      }
+    }, { rootMargin: "600px" });
+    io.observe(node);
+    return () => io.disconnect();
+  }, [infinite.hasNextPage, infinite.isFetchingNextPage, infinite]);
+
+  // Deduped, flat feed across pages
+  const infiniteItems = useMemo(() => {
+    const seen = new Set<number>();
+    const out: TmdbItem[] = [];
+    for (const page of infinite.data?.pages ?? []) {
+      for (const it of page.results ?? []) {
+        if (!seen.has(it.id)) {
+          seen.add(it.id);
+          out.push(it);
+        }
+      }
+    }
+    return out;
+  }, [infinite.data]);
+
   const heroSource = movies.filter((m) => m.featured).slice(0, 6);
   const continueWatching = (history.data ?? []).filter((h) => h.progress < 100).map((h) => h.movie);
 
@@ -60,12 +90,6 @@ function Home() {
       <HeroCarousel movies={heroSource.length ? heroSource : movies.slice(0, 6)} />
 
       <div className="mt-4 md:mt-8 space-y-8 md:space-y-12">
-        {!TMDB_ENABLED && (
-          <div className="mx-4 md:mx-6 glass rounded-2xl px-4 py-3 text-sm text-muted-foreground">
-            <span className="text-gradient-emerald font-semibold">Tip:</span> Add a <code className="text-primary">VITE_TMDB_API_KEY</code> secret to fill the library with live TMDb data across every category.
-          </div>
-        )}
-
         {user && continueWatching.length > 0 && (
           <MovieRow title="Continue Watching" subtitle="Pick up right where you left off" movies={continueWatching} size="md" />
         )}
@@ -86,9 +110,13 @@ function Home() {
         <TmdbRow title="Horror" items={horror.data} loading={horror.isLoading} />
         <TmdbRow title="Romance" items={romance.data} loading={romance.isLoading} />
         <TmdbRow title="Animation" items={animation.data} loading={animation.isLoading} />
-        <TmdbRow title="Crime" items={crime.data} loading={crime.isLoading} />
-        <TmdbRow title="Sci-Fi" items={sciFi.data} loading={sciFi.isLoading} />
-        <TmdbRow title="Thriller" items={thriller.data} loading={thriller.isLoading} />
+
+        {/* Endless feed */}
+        {TMDB_ENABLED && (
+          <InfiniteFeed items={infiniteItems} loading={infinite.isFetching} />
+        )}
+
+        <div ref={sentinelRef} className="h-24" />
 
         {movies.length === 0 && !TMDB_ENABLED && (
           <div className="mx-4 md:mx-6 glass rounded-2xl p-8 text-center">
@@ -99,5 +127,28 @@ function Home() {
         )}
       </div>
     </AppShell>
+  );
+}
+
+function InfiniteFeed({ items, loading }: { items: TmdbItem[]; loading: boolean }) {
+  // Hide items already uploaded to avoid duplicates (the uploaded copy shows in "Fresh Uploads")
+  const uploaded = useUploadedByTmdb();
+  const filtered = items.filter((it) => !uploaded.has(it.id));
+  if (filtered.length === 0 && !loading) return null;
+  return (
+    <section className="px-4 md:px-6">
+      <div className="mb-3">
+        <h2 className="text-lg md:text-2xl font-bold">Endless Discovery</h2>
+        <p className="text-xs md:text-sm text-muted-foreground">Keep scrolling — there's always more.</p>
+      </div>
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-2.5 md:gap-4">
+        {filtered.map((it) => (
+          <TmdbCard key={it.id} item={it} size="sm" />
+        ))}
+        {loading && Array.from({ length: 12 }).map((_, i) => (
+          <div key={`sk-${i}`} className="aspect-[2/3] rounded-2xl bg-white/5 animate-pulse" />
+        ))}
+      </div>
+    </section>
   );
 }

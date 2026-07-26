@@ -4,8 +4,8 @@ import { z } from "zod";
 import { AppShell } from "@/components/layout/AppShell";
 import { MovieGrid } from "@/components/movies/MovieGrid";
 import { TmdbCard } from "@/components/movies/TmdbCard";
-import { useAllMovies } from "@/lib/movies";
-import { useTmdbSearch, TMDB_ENABLED } from "@/lib/tmdb";
+import { useAllMovies, useUploadedByTmdb } from "@/lib/movies";
+import { useTmdbSearch, TMDB_ENABLED, type TmdbItem } from "@/lib/tmdb";
 import { Input } from "@/components/ui/input";
 import { Search as SearchIcon, X, Loader2 } from "lucide-react";
 
@@ -27,22 +27,26 @@ export const Route = createFileRoute("/search")({
 function SearchPage() {
   const { q } = Route.useSearch();
   const all = useAllMovies();
+  const uploaded = useUploadedByTmdb();
   const [query, setQuery] = useState(q ?? "");
   const [debounced, setDebounced] = useState(query);
 
   useEffect(() => { setQuery(q ?? ""); }, [q]);
   useEffect(() => {
-    const t = setTimeout(() => setDebounced(query.trim()), 180);
+    // Faster debounce for snappier feel
+    const t = setTimeout(() => setDebounced(query.trim()), 120);
     return () => clearTimeout(t);
   }, [query]);
 
   const tmdb = useTmdbSearch(debounced);
 
+  // Uploaded library results (fast, in-memory)
   const libResults = useMemo(() => {
     const t = debounced.toLowerCase();
     if (!t) return [];
     return all.filter((m) =>
       m.title.toLowerCase().includes(t) ||
+      (m.originalTitle ?? "").toLowerCase().includes(t) ||
       m.description.toLowerCase().includes(t) ||
       m.genres.some((g) => g.toLowerCase().includes(t)) ||
       m.country.toLowerCase().includes(t) ||
@@ -50,9 +54,20 @@ function SearchPage() {
     );
   }, [all, debounced]);
 
-  const tmdbResults = (tmdb.data ?? []).filter(
-    (it) => it.media_type === "movie" || it.media_type === "tv",
-  );
+  // TMDb results — deduped by id, exclude those we already have uploaded
+  const tmdbResults = useMemo(() => {
+    const seen = new Set<number>();
+    const out: TmdbItem[] = [];
+    for (const it of tmdb.data ?? []) {
+      if (it.media_type !== "movie" && it.media_type !== "tv") continue;
+      if (uploaded.has(it.id)) continue;
+      if (seen.has(it.id)) continue;
+      seen.add(it.id);
+      out.push(it);
+    }
+    return out;
+  }, [tmdb.data, uploaded]);
+
   const hasQuery = debounced.length > 0;
 
   return (
@@ -91,7 +106,7 @@ function SearchPage() {
         <div className="mt-8">
           <div className="mx-auto max-w-7xl px-4 md:px-6 mb-2">
             <h2 className="text-base md:text-lg font-bold">
-              In our library <span className="text-muted-foreground text-xs md:text-sm font-normal">· {libResults.length}</span>
+              Available now <span className="text-muted-foreground text-xs md:text-sm font-normal">· {libResults.length}</span>
             </h2>
           </div>
           <MovieGrid movies={libResults} />
@@ -101,9 +116,9 @@ function SearchPage() {
       {hasQuery && TMDB_ENABLED && (
         <div className="mx-auto max-w-7xl px-4 md:px-6 mt-8">
           <h2 className="text-base md:text-lg font-bold mb-3">
-            From TMDb <span className="text-muted-foreground text-xs md:text-sm font-normal">· {tmdbResults.length}</span>
+            Trailers & More <span className="text-muted-foreground text-xs md:text-sm font-normal">· {tmdbResults.length}</span>
           </h2>
-          {tmdbResults.length === 0 && !tmdb.isFetching ? (
+          {tmdbResults.length === 0 && !tmdb.isFetching && libResults.length === 0 ? (
             <div className="text-sm text-muted-foreground">No matches found.</div>
           ) : (
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2.5 md:gap-4">
