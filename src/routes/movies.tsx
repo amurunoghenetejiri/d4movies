@@ -111,7 +111,7 @@ function MoviesPage() {
           )}
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 md:gap-5">
             {tmdbItems.map((it) => (
-              <div key={it.id} className="flex justify-center"><TmdbCard it={it as any} /></div>
+              <div key={it.id} className="flex justify-center"><TmdbCard item={it as any} /></div>
             ))}
           </div>
           <div ref={sentinelRef} className="h-16 grid place-items-center text-xs text-muted-foreground">
