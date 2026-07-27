@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
-import { Search, User, Menu, X, Home, Film, Tv, UserCircle, TrendingUp, LogOut, Settings as SettingsIcon, Shield, Heart, Bookmark, Clock, Download, UploadCloud } from "lucide-react";
+import { Search, User, Menu, X, Home, Film, UserCircle, LogOut, Settings as SettingsIcon, Shield, Heart, Bookmark, Clock, Download, UploadCloud, Zap } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Logo } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/button";
@@ -174,27 +174,67 @@ export function Navbar() {
         </div>
       )}
 
-      <nav className="fixed bottom-3 inset-x-3 z-40 md:hidden">
-        <div className="glass-strong flex items-center justify-around rounded-full py-2 px-3 shadow-2xl">
-          {[
-            { to: "/", label: "Home", icon: Home },
-            { to: "/movies", label: "Movies", icon: Film },
-            { to: "/tv-series", label: "TV", icon: Tv },
-            { to: "/trending", label: "Trend", icon: TrendingUp },
-            { to: "/profile", label: "Me", icon: UserCircle },
-          ].map((i) => (
+      <BottomNav user={user} profile={profile} initials={initials} />
+    </>
+  );
+}
+
+function BottomNav({ user, profile, initials }: { user: any; profile: any; initials: string }) {
+  const meTo = user ? "/profile" : "/login";
+  const items = [
+    { to: "/", label: "Home", icon: Home, exact: true },
+    { to: "/movies", label: "Movies", icon: Film },
+    { to: "/shorts", label: "Shorts", icon: Zap },
+    { to: "/downloads", label: "Downloads", icon: Download },
+  ] as const;
+  const [left, middleLeft, middleRight, right] = [items[0], items[1], items[2], items[3]];
+  return (
+    <nav className="fixed bottom-3 inset-x-3 z-40 md:hidden">
+      <div className="relative glass-strong rounded-full px-2 py-1.5 shadow-2xl">
+        <div className="grid grid-cols-5 items-end">
+          <BottomItem {...left} />
+          <BottomItem {...middleLeft} />
+          <div className="flex justify-center">
             <Link
-              key={i.to}
-              to={i.to}
-              className="flex flex-col items-center gap-0.5 rounded-full px-3 py-1.5 text-[10px] text-muted-foreground hover:text-foreground [&.active]:text-primary"
-              activeOptions={{ exact: i.to === "/" }}
+              to={meTo}
+              className="-mt-6 grid place-items-center size-14 rounded-full bg-gradient-to-br from-primary to-gold text-primary-foreground shadow-[0_10px_30px_-8px_hsl(var(--primary)/0.6)] ring-4 ring-background transition-transform active:scale-95 [&.active]:scale-105"
+              aria-label="Me"
             >
-              <i.icon className="size-5" />
-              <span>{i.label}</span>
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="" className="size-full rounded-full object-cover" />
+              ) : user ? (
+                <span className="text-sm font-bold">{initials}</span>
+              ) : (
+                <UserCircle className="size-6" />
+              )}
             </Link>
-          ))}
+          </div>
+          <BottomItem {...middleRight} />
+          <BottomItem {...right} />
         </div>
-      </nav>
+      </div>
+    </nav>
+  );
+}
+
+function BottomItem({ to, label, icon: Icon, exact }: { to: any; label: string; icon: any; exact?: boolean }) {
+  return (
+    <Link
+      to={to}
+      className="flex flex-col items-center gap-0 rounded-full px-1 pt-1 pb-0.5 text-[10px] leading-tight text-muted-foreground hover:text-foreground [&.active]:text-primary"
+      activeOptions={{ exact: !!exact }}
+    >
+      <Icon className="size-[18px]" />
+      <span className="mt-0.5">{label}</span>
+    </Link>
+  );
+}
+
+function _Legacy() {
+  return (
+    <>
+      <nav />
+      {/* placeholder to keep JSX valid */}
     </>
   );
 }
