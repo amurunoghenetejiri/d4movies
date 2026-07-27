@@ -230,14 +230,6 @@ function BottomItem({ to, label, icon: Icon, exact }: { to: any; label: string; 
   );
 }
 
-function _Legacy() {
-  return (
-    <>
-      <nav />
-      {/* placeholder to keep JSX valid */}
-    </>
-  );
-}
 
 function MenuLink({ to, icon: Icon, children }: { to: any; icon: any; children: React.ReactNode }) {
   return (
