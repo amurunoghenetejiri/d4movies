@@ -17,6 +17,7 @@ import { Route as TopRatedRouteImport } from './routes/top-rated'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ShortsRouteImport } from './routes/shorts'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -49,6 +50,7 @@ import { Route as WatchIdRouteImport } from './routes/watch.$id'
 import { Route as TrailerIdRouteImport } from './routes/trailer.$id'
 import { Route as TmdbIdRouteImport } from './routes/tmdb.$id'
 import { Route as MovieIdRouteImport } from './routes/movie.$id'
+import { Route as ApiYoutubeRouteImport } from './routes/api/youtube'
 
 const WatchlistRoute = WatchlistRouteImport.update({
   id: '/watchlist',
@@ -88,6 +90,11 @@ const SupportRoute = SupportRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShortsRoute = ShortsRouteImport.update({
+  id: '/shorts',
+  path: '/shorts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -250,6 +257,11 @@ const MovieIdRoute = MovieIdRouteImport.update({
   path: '/movie/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiYoutubeRoute = ApiYoutubeRouteImport.update({
+  id: '/api/youtube',
+  path: '/api/youtube',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -280,6 +292,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
+  '/shorts': typeof ShortsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
@@ -288,6 +301,7 @@ export interface FileRoutesByFullPath {
   '/tv-series': typeof TvSeriesRoute
   '/upload': typeof UploadRoute
   '/watchlist': typeof WatchlistRoute
+  '/api/youtube': typeof ApiYoutubeRoute
   '/movie/$id': typeof MovieIdRoute
   '/tmdb/$id': typeof TmdbIdRoute
   '/trailer/$id': typeof TrailerIdRoute
@@ -322,6 +336,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
+  '/shorts': typeof ShortsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
@@ -330,6 +345,7 @@ export interface FileRoutesByTo {
   '/tv-series': typeof TvSeriesRoute
   '/upload': typeof UploadRoute
   '/watchlist': typeof WatchlistRoute
+  '/api/youtube': typeof ApiYoutubeRoute
   '/movie/$id': typeof MovieIdRoute
   '/tmdb/$id': typeof TmdbIdRoute
   '/trailer/$id': typeof TrailerIdRoute
@@ -365,6 +381,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
+  '/shorts': typeof ShortsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
@@ -373,6 +390,7 @@ export interface FileRoutesById {
   '/tv-series': typeof TvSeriesRoute
   '/upload': typeof UploadRoute
   '/watchlist': typeof WatchlistRoute
+  '/api/youtube': typeof ApiYoutubeRoute
   '/movie/$id': typeof MovieIdRoute
   '/tmdb/$id': typeof TmdbIdRoute
   '/trailer/$id': typeof TrailerIdRoute
@@ -409,6 +427,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/search'
     | '/settings'
+    | '/shorts'
     | '/sitemap.xml'
     | '/support'
     | '/terms'
@@ -417,6 +436,7 @@ export interface FileRouteTypes {
     | '/tv-series'
     | '/upload'
     | '/watchlist'
+    | '/api/youtube'
     | '/movie/$id'
     | '/tmdb/$id'
     | '/trailer/$id'
@@ -451,6 +471,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/search'
     | '/settings'
+    | '/shorts'
     | '/sitemap.xml'
     | '/support'
     | '/terms'
@@ -459,6 +480,7 @@ export interface FileRouteTypes {
     | '/tv-series'
     | '/upload'
     | '/watchlist'
+    | '/api/youtube'
     | '/movie/$id'
     | '/tmdb/$id'
     | '/trailer/$id'
@@ -493,6 +515,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/search'
     | '/settings'
+    | '/shorts'
     | '/sitemap.xml'
     | '/support'
     | '/terms'
@@ -501,6 +524,7 @@ export interface FileRouteTypes {
     | '/tv-series'
     | '/upload'
     | '/watchlist'
+    | '/api/youtube'
     | '/movie/$id'
     | '/tmdb/$id'
     | '/trailer/$id'
@@ -536,6 +560,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
+  ShortsRoute: typeof ShortsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
@@ -544,6 +569,7 @@ export interface RootRouteChildren {
   TvSeriesRoute: typeof TvSeriesRoute
   UploadRoute: typeof UploadRoute
   WatchlistRoute: typeof WatchlistRoute
+  ApiYoutubeRoute: typeof ApiYoutubeRoute
   MovieIdRoute: typeof MovieIdRoute
   TmdbIdRoute: typeof TmdbIdRoute
   TrailerIdRoute: typeof TrailerIdRoute
@@ -606,6 +632,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shorts': {
+      id: '/shorts'
+      path: '/shorts'
+      fullPath: '/shorts'
+      preLoaderRoute: typeof ShortsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -832,6 +865,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MovieIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/youtube': {
+      id: '/api/youtube'
+      path: '/api/youtube'
+      fullPath: '/api/youtube'
+      preLoaderRoute: typeof ApiYoutubeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -864,6 +904,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
+  ShortsRoute: ShortsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
@@ -872,6 +913,7 @@ const rootRouteChildren: RootRouteChildren = {
   TvSeriesRoute: TvSeriesRoute,
   UploadRoute: UploadRoute,
   WatchlistRoute: WatchlistRoute,
+  ApiYoutubeRoute: ApiYoutubeRoute,
   MovieIdRoute: MovieIdRoute,
   TmdbIdRoute: TmdbIdRoute,
   TrailerIdRoute: TrailerIdRoute,
