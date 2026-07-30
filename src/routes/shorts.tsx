@@ -2,16 +2,22 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
-import { Search, Volume2, VolumeX, Play, Pause, Heart, Share2 } from "lucide-react";
+import { Search, Volume2, VolumeX, Heart, Share2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/shorts")({
   head: () => ({
     meta: [
       { title: "Shorts — D4MOVIES" },
-      { name: "description", content: "Trailers, clips, interviews and behind-the-scenes in a vertical feed." },
+      {
+        name: "description",
+        content: "Trailers, clips, interviews and behind-the-scenes in a vertical feed.",
+      },
       { property: "og:title", content: "Shorts — D4MOVIES" },
-      { property: "og:description", content: "A vertical short-video feed for movie fans." },
+      {
+        property: "og:description",
+        content: "A vertical short-video feed for movie fans.",
+      },
     ],
   }),
   component: ShortsPage,
@@ -70,41 +76,62 @@ function ShortsPage() {
         </div>
       </div>
 
-      <ShortsFeed items={items} onNearEnd={() => q.hasNextPage && !q.isFetchingNextPage && q.fetchNextPage()} loading={q.isLoading} />
+      <ShortsFeed
+        items={items}
+        onNearEnd={() => q.hasNextPage && !q.isFetchingNextPage && q.fetchNextPage()}
+        loading={q.isLoading}
+      />
     </AppShell>
   );
 }
 
-function ShortsFeed({ items, onNearEnd, loading }: { items: YTItem[]; onNearEnd: () => void; loading: boolean }) {
+function ShortsFeed({
+  items,
+  onNearEnd,
+  loading,
+}: {
+  items: YTItem[];
+  onNearEnd: () => void;
+  loading: boolean;
+}) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [muted, setMuted] = useState(true);
+  const onNearEndRef = useRef(onNearEnd);
+  onNearEndRef.current = onNearEnd;
 
   useEffect(() => {
     const el = scrollerRef.current;
     if (!el) return;
+    const nodes = el.querySelectorAll<HTMLElement>("[data-short]");
+    if (!nodes.length) return;
+
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
           if (e.isIntersecting && e.intersectionRatio > 0.6) {
             const idx = Number((e.target as HTMLElement).dataset.idx);
-            setActiveIndex(idx);
+            if (!Number.isNaN(idx)) setActiveIndex(idx);
           }
         }
-        if (entries.some((e) => e.isIntersecting && Number((e.target as HTMLElement).dataset.idx) >= items.length - 3)) {
-          onNearEnd();
+        if (
+          entries.some(
+            (e) => e.isIntersecting && Number((e.target as HTMLElement).dataset.idx) >= items.length - 3,
+          )
+        ) {
+          onNearEndRef.current();
         }
       },
       { root: el, threshold: [0.6] },
     );
-    el.querySelectorAll<HTMLElement>("[data-short]").forEach((n) => io.observe(n));
+    nodes.forEach((n) => io.observe(n));
     return () => io.disconnect();
-  }, [items.length, onNearEnd]);
+  }, [items.length]);
 
   return (
     <div
       ref={scrollerRef}
-      className="fixed inset-0 top-0 md:top-0 pt-0 overflow-y-auto snap-y snap-mandatory"
+      className="fixed inset-0 top-0 overflow-y-auto snap-y snap-mandatory"
       style={{ scrollbarWidth: "none" }}
     >
       {loading && items.length === 0 && (
@@ -128,37 +155,27 @@ function ShortsFeed({ items, onNearEnd, loading }: { items: YTItem[]; onNearEnd:
 }
 
 function ShortItem({
-  item, idx, active, muted, onToggleMute,
-}: { item: YTItem; idx: number; active: boolean; muted: boolean; onToggleMute: () => void }) {
-  const [playing, setPlaying] = useState(true);
+  item,
+  idx,
+  active,
+  muted,
+  onToggleMute,
+}: {
+  item: YTItem;
+  idx: number;
+  active: boolean;
+  muted: boolean;
+  onToggleMute: () => void;
+}) {
   const [liked, setLiked] = useState(false);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // mute=1 is required for mobile autoplay; enablejsapi allows play commands
+  // Mobile-friendly embed:
+  // - mute so autoplay is allowed
+  // - controls=1 so user can tap native play
+  // - no full-screen overlay blocking the video
   const src = active
-    ? `https://www.youtube.com/embed/\( {item.id}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&playsinline=1&loop=1&playlist= \){item.id}&enablejsapi=1&iv_load_policy=3`
+    ? `https://www.youtube.com/embed/\( {item.id}?autoplay=1&mute= \){muted ? 1 : 0}&controls=1&modestbranding=1&rel=0&playsinline=1&loop=1&playlist=${item.id}&fs=1`
     : "";
-
-  const postCmd = (func: "playVideo" | "pauseVideo" | "mute" | "unMute") => {
-    const win = iframeRef.current?.contentWindow;
-    if (!win) return;
-    win.postMessage(JSON.stringify({ event: "command", func, args: [] }), "*");
-  };
-
-  // After iframe loads, force play (helps on phones)
-  const onIframeLoad = () => {
-    postCmd("playVideo");
-    postCmd(muted ? "mute" : "unMute");
-    window.setTimeout(() => {
-      postCmd("playVideo");
-      postCmd(muted ? "mute" : "unMute");
-    }, 400);
-  };
-
-  useEffect(() => {
-    if (!active || !src) return;
-    postCmd(muted ? "mute" : "unMute");
-  }, [muted, active, src]);
 
   const share = async () => {
     const url = `https://youtu.be/${item.id}`;
@@ -173,93 +190,66 @@ function ShortItem({
     }
   };
 
+  const title = item.title.replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"');
+
   return (
     <section
       data-short
       data-idx={idx}
       className="relative h-[100dvh] w-full snap-start snap-always flex items-center justify-center bg-black"
     >
-      {active ? (
+      <img
+        src={item.thumbnail}
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover"
+        loading={idx < 2 ? "eager" : "lazy"}
+      />
+
+      {active && src && (
         <iframe
-          ref={iframeRef}
-          key={item.id}
+          key={`\( {item.id}- \){muted ? "m" : "u"}`}
           src={src}
-          title={item.title}
-          className="absolute inset-0 h-full w-full"
-          allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+          title={title}
+          className="absolute inset-0 h-full w-full z-[1]"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
-          onLoad={onIframeLoad}
-        />
-      ) : (
-        <img
-          src={item.thumbnail}
-          alt={item.title}
-          className="absolute inset-0 h-full w-full object-cover opacity-70"
+          referrerPolicy="strict-origin-when-cross-origin"
         />
       )}
 
-      {/* Tap to play/pause — also unlocks autoplay on mobile */}
-      <button
-        type="button"
-        aria-label={playing ? "Pause" : "Play"}
-        onClick={() => {
-          if (playing) {
-            postCmd("pauseVideo");
-            setPlaying(false);
-          } else {
-            postCmd("playVideo");
-            postCmd(muted ? "mute" : "unMute");
-            setPlaying(true);
-          }
-        }}
-        className="absolute inset-0 z-10"
-      >
-        {!playing && (
-          <div className="absolute inset-0 grid place-items-center pointer-events-none">
-            <div className="size-16 rounded-full bg-black/50 backdrop-blur grid place-items-center">
-              <Play className="size-8 fill-white text-white" />
-            </div>
-          </div>
-        )}
-      </button>
+      <div className="absolute right-3 bottom-36 z-20 flex flex-col gap-3">
+        <button
+          type="button"
+          onClick={() => setLiked((v) => !v)}
+          className={`size-11 rounded-full grid place-items-center glass ${liked ? "text-red-500" : "text-foreground"}`}
+          aria-label="Like"
+        >
+          <Heart className={`size-5 ${liked ? "fill-current" : ""}`} />
+        </button>
+        <button
+          type="button"
+          onClick={onToggleMute}
+          className="size-11 rounded-full grid place-items-center glass"
+          aria-label="Mute"
+        >
+          {muted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
+        </button>
+        <button
+          type="button"
+          onClick={share}
+          className="size-11 rounded-full grid place-items-center glass"
+          aria-label="Share"
+        >
+          <Share2 className="size-5" />
+        </button>
+      </div>
 
-      <div className="absolute inset-x-0 bottom-0 z-20 p-4 pb-32 md:pb-8 bg-gradient-to-t from-black via-black/70 to-transparent pointer-events-none">
-        <div className="flex items-end justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <div className="text-xs text-primary font-semibold truncate">@{item.channel}</div>
-            <h3 className="text-sm md:text-base font-semibold line-clamp-2">{item.title}</h3>
-          </div>
-          <div className="flex flex-col gap-3 pointer-events-auto">
-            <button
-              type="button"
-              onClick={() => setLiked((v) => !v)}
-              className={`size-11 rounded-full grid place-items-center glass ${liked ? "text-red-500" : "text-foreground"}`}
-              aria-label="Like"
-            >
-              <Heart className={`size-5 ${liked ? "fill-current" : ""}`} />
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                onToggleMute();
-                postCmd(muted ? "unMute" : "mute");
-              }}
-              className="size-11 rounded-full grid place-items-center glass"
-              aria-label="Mute"
-            >
-              {muted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
-            </button>
-            <button
-              type="button"
-              onClick={share}
-              className="size-11 rounded-full grid place-items-center glass"
-              aria-label="Share"
-            >
-              <Share2 className="size-5" />
-            </button>
-          </div>
+      <div className="absolute inset-x-0 bottom-0 z-20 p-4 pb-28 md:pb-8 bg-gradient-to-t from-black via-black/70 to-transparent pointer-events-none">
+        <div className="min-w-0 pr-14">
+          <div className="text-xs text-primary font-semibold truncate">@{item.channel}</div>
+          <h3 className="text-sm md:text-base font-semibold line-clamp-2">{title}</h3>
         </div>
       </div>
     </section>
   );
-  }
+}
