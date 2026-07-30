@@ -256,93 +256,9 @@ function ShortItem({
 }) {
   const [playing, setPlaying] = useState(true);
   const [liked, setLiked] = useState(false);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-
-  const src = active
-    ? `https://www.youtube.com/embed/\( {item.id}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&playsinline=1&loop=1&playlist= \){item.id}&enablejsapi=1&iv_load_policy=3`
-    : "";
-
-  useEffect(() => {
-    if (active) setPlaying(true);
-  }, [active]);
-
-  const postCmd = (func: "playVideo" | "pauseVideo" | "mute" | "unMute") => {
-    const win = iframeRef.current?.contentWindow;
-    if (!win) return;
-    win.postMessage(JSON.stringify({ event: "command", func, args: [] }), "*");
-  };
-
-  useEffect(() => {
-    if (!active || !src) return;
-    const t = window.setTimeout(() => postCmd(muted ? "mute" : "unMute"), 400);
-    return () => clearTimeout(t);
-  }, [muted, active, src]);
-
-  const share = async () => {
-    const url = `https://youtu.be/${item.id}`;
-    try {
-      if (navigator.share) await navigator.share({ title: item.title, url });
-      else {
-        await navigator.clipboard.writeText(url);
-        toast("Link copied");
-      }
-    } catch {
-      /* cancelled */
-    }
-  };
-
-  return (
-    <section
-      data-short
-      data-idx={idx}
-      className="relative h-[100dvh] w-full snap-start snap-always flex items-center justify-center bg-black"
-    >
-      {active && src ? (
-        <iframe
-          ref={iframeRef}
-          key={item.id}
-          src={src}
-          title={item.title}
-          className="absolute inset-0 h-full w-full pointer-events-none"
-          allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-          allowFullScreen
-          loading="eager"
-        />
-      ) : (
-        <img
-          src={item.thumbnail}
-          alt={item.title}
-          className="absolute inset-0 h-full w-full object-cover opacity-80"
-          loading={preload || idx < 2 ? "eager" : "lazy"}
-          decoding="async"
-        />
-      )}
-
-      <button
-        type="button"
-        aria-label={playing ? "Pause" : "Play"}
-        onClick={() => {
-function ShortItem({
-  item,
-  idx,
-  active,
-  preload,
-  muted,
-  onToggleMute,
-}: {
-  item: YTItem;
-  idx: number;
-  active: boolean;
-  preload: boolean;
-  muted: boolean;
-  onToggleMute: () => void;
-}) {
-  const [playing, setPlaying] = useState(true);
-  const [liked, setLiked] = useState(false);
   const [ready, setReady] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // nocookie + mute helps autoplay on mobile; enablejsapi for play commands
   const src = active
     ? `https://www.youtube-nocookie.com/embed/\( {item.id}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&playsinline=1&loop=1&playlist= \){item.id}&enablejsapi=1&iv_load_policy=3&fs=0`
     : "";
@@ -357,10 +273,7 @@ function ShortItem({
   const postCmd = (func: "playVideo" | "pauseVideo" | "mute" | "unMute") => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
-    win.postMessage(
-      JSON.stringify({ event: "command", func, args: [] }),
-      "*",
-    );
+    win.postMessage(JSON.stringify({ event: "command", func, args: [] }), "*");
   };
 
   const forcePlay = () => {
@@ -369,7 +282,6 @@ function ShortItem({
     setPlaying(true);
   };
 
-  // When iframe loads, keep trying play (mobile often needs this)
   const onIframeLoad = () => {
     setReady(true);
     forcePlay();
@@ -401,7 +313,6 @@ function ShortItem({
       data-idx={idx}
       className="relative h-[100dvh] w-full snap-start snap-always flex items-center justify-center bg-black"
     >
-      {/* Thumbnail under the iframe so black never shows while loading */}
       <img
         src={item.thumbnail}
         alt=""
@@ -424,7 +335,6 @@ function ShortItem({
         />
       )}
 
-      {/* Tap anywhere: play/pause (also unlocks autoplay on mobile) */}
       <button
         type="button"
         aria-label={playing ? "Pause" : "Play"}
@@ -483,4 +393,4 @@ function ShortItem({
       </div>
     </section>
   );
-  }
+}
