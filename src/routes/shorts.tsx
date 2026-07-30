@@ -132,17 +132,45 @@ function ShortItem({
 }: { item: YTItem; idx: number; active: boolean; muted: boolean; onToggleMute: () => void }) {
   const [playing, setPlaying] = useState(true);
   const [liked, setLiked] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
+  // mute=1 is required for mobile autoplay; enablejsapi allows play commands
   const src = active
-    ? `https://www.youtube.com/embed/\( {item.id}?autoplay=1&mute= \){muted ? 1 : 0}&controls=0&modestbranding=1&rel=0&playsinline=1&loop=1&playlist=\( {item.id}& \){playing ? "" : "start=0&"}iv_load_policy=3`
+    ? `https://www.youtube.com/embed/\( {item.id}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&playsinline=1&loop=1&playlist= \){item.id}&enablejsapi=1&iv_load_policy=3`
     : "";
+
+  const postCmd = (func: "playVideo" | "pauseVideo" | "mute" | "unMute") => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    win.postMessage(JSON.stringify({ event: "command", func, args: [] }), "*");
+  };
+
+  // After iframe loads, force play (helps on phones)
+  const onIframeLoad = () => {
+    postCmd("playVideo");
+    postCmd(muted ? "mute" : "unMute");
+    window.setTimeout(() => {
+      postCmd("playVideo");
+      postCmd(muted ? "mute" : "unMute");
+    }, 400);
+  };
+
+  useEffect(() => {
+    if (!active || !src) return;
+    postCmd(muted ? "mute" : "unMute");
+  }, [muted, active, src]);
 
   const share = async () => {
     const url = `https://youtu.be/${item.id}`;
     try {
       if (navigator.share) await navigator.share({ title: item.title, url });
-      else { await navigator.clipboard.writeText(url); toast("Link copied"); }
-    } catch { /* cancelled */ }
+      else {
+        await navigator.clipboard.writeText(url);
+        toast("Link copied");
+      }
+    } catch {
+      /* cancelled */
+    }
   };
 
   return (
@@ -153,34 +181,41 @@ function ShortItem({
     >
       {active ? (
         <iframe
-          key={src}
+          ref={iframeRef}
+          key={item.id}
           src={src}
           title={item.title}
-          className="absolute inset-0 h-full w-full pointer-events-none"
-          allow="autoplay; encrypted-media; picture-in-picture"
+          className="absolute inset-0 h-full w-full"
+          allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
           allowFullScreen
+          onLoad={onIframeLoad}
         />
       ) : (
-        <img src={item.thumbnail} alt={item.title} className="absolute inset-0 h-full w-full object-cover opacity-70" />
+        <img
+          src={item.thumbnail}
+          alt={item.title}
+          className="absolute inset-0 h-full w-full object-cover opacity-70"
+        />
       )}
 
-      {/* Tap-to-play/pause overlay (uses YT postMessage) */}
+      {/* Tap to play/pause — also unlocks autoplay on mobile */}
       <button
+        type="button"
         aria-label={playing ? "Pause" : "Play"}
         onClick={() => {
-          const iframe = (document.querySelector(`section[data-idx="${idx}"] iframe`) as HTMLIFrameElement | null);
-          if (iframe?.contentWindow) {
-            iframe.contentWindow.postMessage(
-              JSON.stringify({ event: "command", func: playing ? "pauseVideo" : "playVideo", args: [] }),
-              "*",
-            );
+          if (playing) {
+            postCmd("pauseVideo");
+            setPlaying(false);
+          } else {
+            postCmd("playVideo");
+            postCmd(muted ? "mute" : "unMute");
+            setPlaying(true);
           }
-          setPlaying((v) => !v);
         }}
         className="absolute inset-0 z-10"
       >
         {!playing && (
-          <div className="absolute inset-0 grid place-items-center">
+          <div className="absolute inset-0 grid place-items-center pointer-events-none">
             <div className="size-16 rounded-full bg-black/50 backdrop-blur grid place-items-center">
               <Play className="size-8 fill-white text-white" />
             </div>
@@ -196,16 +231,30 @@ function ShortItem({
           </div>
           <div className="flex flex-col gap-3 pointer-events-auto">
             <button
+              type="button"
               onClick={() => setLiked((v) => !v)}
               className={`size-11 rounded-full grid place-items-center glass ${liked ? "text-red-500" : "text-foreground"}`}
               aria-label="Like"
             >
               <Heart className={`size-5 ${liked ? "fill-current" : ""}`} />
             </button>
-            <button onClick={onToggleMute} className="size-11 rounded-full grid place-items-center glass" aria-label="Mute">
+            <button
+              type="button"
+              onClick={() => {
+                onToggleMute();
+                postCmd(muted ? "unMute" : "mute");
+              }}
+              className="size-11 rounded-full grid place-items-center glass"
+              aria-label="Mute"
+            >
               {muted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
             </button>
-            <button onClick={share} className="size-11 rounded-full grid place-items-center glass" aria-label="Share">
+            <button
+              type="button"
+              onClick={share}
+              className="size-11 rounded-full grid place-items-center glass"
+              aria-label="Share"
+            >
               <Share2 className="size-5" />
             </button>
           </div>
