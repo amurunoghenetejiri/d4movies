@@ -11,9 +11,11 @@ const links = [
   { to: "/movies", label: "Movies" },
   { to: "/tv-series", label: "TV Series" },
   { to: "/anime", label: "Anime" },
+  { to: "/shorts", label: "Shorts" },
   { to: "/trending", label: "Trending" },
   { to: "/latest", label: "Latest" },
   { to: "/genres", label: "Genres" },
+  { to: "/downloads", label: "Downloads" },
 ];
 
 export function Navbar() {
@@ -189,8 +191,8 @@ function BottomNav({ user, profile, initials }: { user: any; profile: any; initi
   ] as const;
   const [left, middleLeft, middleRight, right] = [items[0], items[1], items[2], items[3]];
   return (
-    <nav className="fixed bottom-3 inset-x-3 z-40 md:hidden">
-      <div className="relative glass-strong rounded-full px-2 py-1.5 shadow-2xl">
+    <nav className="fixed bottom-3 inset-x-3 z-40 md:bottom-4 md:inset-x-0 flex justify-center pointer-events-none">
+      <div className="relative glass-strong rounded-full px-2 py-1.5 shadow-2xl pointer-events-auto w-full max-w-md md:max-w-lg">
         <div className="grid grid-cols-5 items-end">
           <BottomItem {...left} />
           <BottomItem {...middleLeft} />
