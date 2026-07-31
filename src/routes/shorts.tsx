@@ -4,20 +4,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Search, Volume2, VolumeX, Heart, Share2 } from "lucide-react";
 import { toast } from "sonner";
+import { TMDB_ENABLED, TMDB_KEY, tmdbPoster } from "@/lib/tmdb";
 
 export const Route = createFileRoute("/shorts")({
   head: () => ({
     meta: [
       { title: "Shorts — D4MOVIES" },
-      {
-        name: "description",
-        content: "Trailers, clips, interviews and behind-the-scenes in a vertical feed.",
-      },
+      { name: "description", content: "Official movie trailers in a vertical feed." },
       { property: "og:title", content: "Shorts — D4MOVIES" },
-      {
-        property: "og:description",
-        content: "A vertical short-video feed for movie fans.",
-      },
+      { property: "og:description", content: "Watch official trailers in a vertical feed." },
     ],
   }),
   component: ShortsPage,
@@ -32,21 +27,102 @@ type YTItem = {
   thumbnail: string;
 };
 
+type TmdbMovie = {
+  id: number;
+  title?: string;
+  name?: string;
+  overview?: string;
+  poster_path: string | null;
+  release_date?: string;
+};
+
+type TmdbVideos = {
+  results: { key: string; site: string; type: string; official: boolean; name: string }[];
+};
+
+async function tmdbGet<T>(path: string, params: Record<string, string | number> = {}): Promise<T> {
+  const url = new URL(`https://api.themoviedb.org/3${path}`);
+  url.searchParams.set("api_key", TMDB_KEY);
+  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v));
+  const r = await fetch(url.toString());
+  if (!r.ok) throw new Error(`TMDB ${r.status}`);
+  return r.json();
+}
+
+function pickTrailer(videos: TmdbVideos | undefined): { key: string; name: string } | null {
+  const yt = (videos?.results ?? []).filter((v) => v.site === "YouTube");
+  const pick =
+    yt.find((v) => v.type === "Trailer" && v.official) ||
+    yt.find((v) => v.type === "Trailer") ||
+    yt.find((v) => v.type === "Teaser") ||
+    yt[0];
+  return pick ? { key: pick.key, name: pick.name } : null;
+}
+
+async function fetchPage(page: number, query: string): Promise<{ items: YTItem[]; nextPage: number | null }> {
+  if (!TMDB_ENABLED) throw new Error("VITE_TMDB_API_KEY missing");
+
+  let movies: TmdbMovie[] = [];
+  let totalPages = 1;
+
+  if (query.trim().length >= 2) {
+    const data = await tmdbGet<{ results: TmdbMovie[]; total_pages: number }>("/search/movie", {
+      query: query.trim(),
+      page,
+      include_adult: "false",
+    });
+    movies = data.results ?? [];
+    totalPages = data.total_pages ?? 1;
+  } else {
+    const path = page % 2 === 1 ? "/movie/popular" : "/movie/now_playing";
+    const pageNum = Math.ceil(page / 2);
+    const data = await tmdbGet<{ results: TmdbMovie[]; total_pages: number }>(path, { page: pageNum });
+    movies = data.results ?? [];
+    totalPages = Math.max(data.total_pages ?? 1, 8);
+  }
+
+  const settled = await Promise.all(
+    movies.slice(0, 12).map(async (m) => {
+      try {
+        const detail = await tmdbGet<TmdbMovie & { videos?: TmdbVideos }>(`/movie/${m.id}`, {
+          append_to_response: "videos",
+        });
+        const trailer = pickTrailer(detail.videos);
+        if (!trailer) return null;
+        const title = m.title || m.name || "Untitled";
+        return {
+          id: trailer.key,
+          title: `${title} — ${trailer.name}`,
+          description: m.overview ?? "",
+          channel: "Official Trailer",
+          publishedAt: m.release_date ?? "",
+          thumbnail: tmdbPoster(m.poster_path, "w500"),
+        } satisfies YTItem;
+      } catch {
+        return null;
+      }
+    }),
+  );
+
+  const seen = new Set<string>();
+  const items = settled.filter((x): x is YTItem => {
+    if (!x || seen.has(x.id)) return false;
+    seen.add(x.id);
+    return true;
+  });
+
+  return { items, nextPage: page < totalPages ? page + 1 : null };
+}
+
 function useShortsFeed(query: string) {
   return useInfiniteQuery({
-    queryKey: ["yt-shorts", query],
-    queryFn: async ({ pageParam }) => {
-      const u = new URL("/api/youtube", window.location.origin);
-      u.searchParams.set("type", "shorts");
-      if (query) u.searchParams.set("q", query);
-      if (pageParam) u.searchParams.set("pageToken", pageParam as string);
-      const r = await fetch(u.toString());
-      if (!r.ok) throw new Error("shorts feed");
-      return (await r.json()) as { items: YTItem[]; nextPageToken: string | null };
-    },
-    initialPageParam: "" as string,
-    getNextPageParam: (last) => last.nextPageToken ?? undefined,
-    staleTime: 60_000,
+    queryKey: ["tmdb-trailer-shorts", query],
+    queryFn: ({ pageParam }) => fetchPage(pageParam as number, query),
+    initialPageParam: 1,
+    getNextPageParam: (last) => last.nextPage ?? undefined,
+    staleTime: 5 * 60_000,
+    enabled: TMDB_ENABLED,
+    retry: 1,
   });
 }
 
@@ -56,11 +132,18 @@ function ShortsPage() {
   const q = useShortsFeed(query);
 
   useEffect(() => {
-    const t = setTimeout(() => setQuery(input.trim()), 250);
+    const t = setTimeout(() => setQuery(input.trim()), 300);
     return () => clearTimeout(t);
   }, [input]);
 
   const items = useMemo(() => q.data?.pages.flatMap((p) => p.items) ?? [], [q.data]);
+  const errorMsg = !TMDB_ENABLED
+    ? "VITE_TMDB_API_KEY is missing on Vercel"
+    : q.error instanceof Error
+      ? q.error.message
+      : q.isError
+        ? "Failed to load trailers"
+        : null;
 
   return (
     <AppShell>
@@ -70,11 +153,20 @@ function ShortsPage() {
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Search trailers, clips, interviews…"
+            placeholder="Search movie trailers…"
             className="bg-transparent outline-none text-sm flex-1 placeholder:text-muted-foreground"
           />
         </div>
       </div>
+
+      {errorMsg && items.length === 0 && (
+        <div className="fixed inset-0 grid place-items-center px-6 text-center z-20">
+          <div className="space-y-2">
+            <p className="font-semibold">Could not load trailers</p>
+            <p className="text-sm text-muted-foreground">{errorMsg}</p>
+          </div>
+        </div>
+      )}
 
       <ShortsFeed
         items={items}
@@ -99,6 +191,10 @@ function ShortsFeed({
   const [muted, setMuted] = useState(true);
   const onNearEndRef = useRef(onNearEnd);
   onNearEndRef.current = onNearEnd;
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [items[0]?.id]);
 
   useEffect(() => {
     const el = scrollerRef.current;
@@ -135,7 +231,7 @@ function ShortsFeed({
       style={{ scrollbarWidth: "none" }}
     >
       {loading && items.length === 0 && (
-        <div className="h-[100dvh] grid place-items-center text-muted-foreground">Loading shorts…</div>
+        <div className="h-[100dvh] grid place-items-center text-muted-foreground">Loading trailers…</div>
       )}
       {items.map((it, i) => (
         <ShortItem
@@ -148,7 +244,9 @@ function ShortsFeed({
         />
       ))}
       {items.length > 0 && (
-        <div className="h-24 grid place-items-center text-xs text-muted-foreground">Loading more…</div>
+        <div className="h-24 grid place-items-center text-xs text-muted-foreground">
+          {loading ? "Loading more…" : "Swipe for more"}
+        </div>
       )}
     </div>
   );
@@ -169,12 +267,8 @@ function ShortItem({
 }) {
   const [liked, setLiked] = useState(false);
 
-  // Mobile-friendly embed:
-  // - mute so autoplay is allowed
-  // - controls=1 so user can tap native play
-  // - no full-screen overlay blocking the video
   const src = active
-    ? `https://www.youtube.com/embed/\( {item.id}?autoplay=1&mute= \){muted ? 1 : 0}&controls=1&modestbranding=1&rel=0&playsinline=1&loop=1&playlist=${item.id}&fs=1`
+    ? `https://www.youtube.com/embed/\( {item.id}?autoplay=1&mute= \){muted ? 1 : 0}&controls=1&modestbranding=1&rel=0&playsinline=1&fs=1`
     : "";
 
   const share = async () => {
@@ -189,8 +283,6 @@ function ShortItem({
       /* cancelled */
     }
   };
-
-  const title = item.title.replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"');
 
   return (
     <section
@@ -209,7 +301,7 @@ function ShortItem({
         <iframe
           key={`\( {item.id}- \){muted ? "m" : "u"}`}
           src={src}
-          title={title}
+          title={item.title}
           className="absolute inset-0 h-full w-full z-[1]"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
@@ -247,7 +339,7 @@ function ShortItem({
       <div className="absolute inset-x-0 bottom-0 z-20 p-4 pb-28 md:pb-8 bg-gradient-to-t from-black via-black/70 to-transparent pointer-events-none">
         <div className="min-w-0 pr-14">
           <div className="text-xs text-primary font-semibold truncate">@{item.channel}</div>
-          <h3 className="text-sm md:text-base font-semibold line-clamp-2">{title}</h3>
+          <h3 className="text-sm md:text-base font-semibold line-clamp-2">{item.title}</h3>
         </div>
       </div>
     </section>
