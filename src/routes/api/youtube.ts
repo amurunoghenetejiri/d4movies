@@ -1,8 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-// YouTube proxy — keeps API key server-side.
-// GET /api/youtube?type=search&q=...&pageToken=...
-// GET /api/youtube?type=shorts&q=...&pageToken=...
 export const Route = createFileRoute("/api/youtube")({
   server: {
     handlers: {
@@ -20,22 +17,17 @@ export const Route = createFileRoute("/api/youtube")({
         yt.searchParams.set("key", key);
         yt.searchParams.set("part", "snippet");
         yt.searchParams.set("type", "video");
-        yt.searchParams.set("maxResults", "20");
+        yt.searchParams.set("maxResults", "25");
         yt.searchParams.set("safeSearch", "moderate");
         yt.searchParams.set("videoEmbeddable", "true");
+        yt.searchParams.set("videoSyndicated", "true");
 
         if (type === "shorts") {
           yt.searchParams.set("videoDuration", "short");
-          yt.searchParams.set(
-            "q",
-            q || "movie trailer shorts clips behind the scenes interview",
-          );
-          yt.searchParams.set("order", "date");
+          yt.searchParams.set("q", q.trim() || "#shorts");
+          yt.searchParams.set("order", q.trim() ? "relevance" : "date");
         } else {
-          yt.searchParams.set(
-            "q",
-            q || "official movie trailer",
-          );
+          yt.searchParams.set("q", q.trim() || "shorts");
           yt.searchParams.set("order", "relevance");
         }
         if (pageToken) yt.searchParams.set("pageToken", pageToken);
@@ -59,8 +51,14 @@ export const Route = createFileRoute("/api/youtube")({
           }>;
         };
 
+        const seen = new Set<string>();
         const items = (data.items ?? [])
-          .filter((it) => it.id?.videoId)
+          .filter((it) => {
+            const id = it.id?.videoId;
+            if (!id || seen.has(id)) return false;
+            seen.add(id);
+            return true;
+          })
           .map((it) => ({
             id: it.id.videoId as string,
             title: it.snippet.title,
@@ -76,7 +74,7 @@ export const Route = createFileRoute("/api/youtube")({
 
         return Response.json(
           { items, nextPageToken: data.nextPageToken ?? null },
-          { headers: { "cache-control": "public, max-age=120" } },
+          { headers: { "cache-control": "public, max-age=60" } },
         );
       },
     },
