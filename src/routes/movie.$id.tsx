@@ -5,7 +5,7 @@ import { useAllMovies, useMovieBySlug } from "@/lib/movies";
 import { Button } from "@/components/ui/button";
 import {
   Bookmark, Download, Heart, Play, Share2, Star, PlayCircle,
-  ThumbsUp, ThumbsDown, Flag, Trash2, Send,
+  ThumbsUp, ThumbsDown, Flag, Trash2, Send, X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -67,6 +67,26 @@ function Details() {
       <CommentsSection movieDbId={m.dbId} />
     </AppShell>
   );
+}
+/** Turn any YouTube / direct video URL into something an iframe can play. */
+function toTrailerEmbedSrc(url: string): string {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./, "");
+    if (host === "youtu.be") {
+      const id = u.pathname.replace(/^\//, "").split("/")[0];
+      if (id) return `https://www.youtube.com/embed/${id}?autoplay=1&playsinline=1&rel=0&modestbranding=1`;
+    }
+    if (host === "youtube.com" || host === "m.youtube.com" || host === "youtube-nocookie.com") {
+      let id = u.searchParams.get("v");
+      if (!id && u.pathname.startsWith("/embed/")) id = u.pathname.split("/")[2];
+      if (!id && u.pathname.startsWith("/shorts/")) id = u.pathname.split("/")[2];
+      if (id) return `https://www.youtube.com/embed/${id}?autoplay=1&playsinline=1&rel=0&modestbranding=1`;
+    }
+  } catch {
+    /* not a valid URL — fall through */
+  }
+  return url;
 }
 
 function MovieHero({ m }: { m: import("@/lib/movies").Movie }) {
@@ -171,9 +191,33 @@ function MovieHero({ m }: { m: import("@/lib/movies").Movie }) {
         </div>
       </div>
       {showTrailer && m.trailerUrl && (
-        <div className="fixed inset-0 z-[80] bg-black/90 grid place-items-center p-4" onClick={() => setShowTrailer(false)}>
-          <div className="w-full max-w-4xl aspect-video">
-            <iframe src={m.trailerUrl} className="w-full h-full rounded-2xl" allow="autoplay; encrypted-media" allowFullScreen />
+        <div
+          className="fixed inset-0 z-[80] bg-black/95 flex flex-col items-center justify-center p-3 sm:p-4"
+          onClick={() => setShowTrailer(false)}
+        >
+          <div className="w-full max-w-4xl flex justify-start mb-2">
+            <button
+              type="button"
+              onClick={() => setShowTrailer(false)}
+              className="flex items-center gap-1.5 rounded-full bg-white/10 hover:bg-white/20 px-3 py-2 text-sm text-white transition-colors"
+              aria-label="Close trailer"
+            >
+              <X className="size-5" />
+              <span>Close</span>
+            </button>
+          </div>
+          <div
+            className="w-full max-w-4xl aspect-video max-h-[70vh] bg-black rounded-xl overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <iframe
+              title={`${m.title} trailer`}
+              src={toTrailerEmbedSrc(m.trailerUrl)}
+              className="h-full w-full border-0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              referrerPolicy="strict-origin-when-cross-origin"
+            />
           </div>
         </div>
       )}
