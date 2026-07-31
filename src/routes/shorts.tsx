@@ -3,16 +3,14 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, Volume2, VolumeX, Heart, Share2, ExternalLink, X, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-import { Logo } from "@/components/brand/Logo";
-import { TMDB_ENABLED, TMDB_KEY, tmdbPoster } from "@/lib/tmdb";
 
 export const Route = createFileRoute("/shorts")({
   head: () => ({
     meta: [
       { title: "Shorts — D4MOVIES" },
-      { name: "description", content: "Official movie trailers in a vertical feed." },
+      { name: "description", content: "Vertical YouTube shorts feed." },
       { property: "og:title", content: "Shorts — D4MOVIES" },
-      { property: "og:description", content: "Watch official trailers in a vertical feed." },
+      { property: "og:description", content: "Watch YouTube shorts in a vertical feed." },
     ],
   }),
   component: ShortsPage,
@@ -25,19 +23,6 @@ type YTItem = {
   channel: string;
   publishedAt: string;
   thumbnail: string;
-};
-
-type TmdbMovie = {
-  id: number;
-  title?: string;
-  name?: string;
-  overview?: string;
-  poster_path: string | null;
-  release_date?: string;
-};
-
-type TmdbVideos = {
-  results: { key: string; site: string; type: string; official: boolean; name: string }[];
 };
 
 let ytReady: Promise<void> | null = null;
@@ -57,88 +42,30 @@ function loadYT(): Promise<void> {
   return ytReady;
 }
 
-async function tmdbGet<T>(path: string, params: Record<string, string | number> = {}): Promise<T> {
-  const url = new URL(`https://api.themoviedb.org/3${path}`);
-  url.searchParams.set("api_key", TMDB_KEY);
-  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v));
-  const r = await fetch(url.toString());
-  if (!r.ok) throw new Error(`TMDB ${r.status}`);
-  return r.json();
-}
-
-function pickTrailer(videos: TmdbVideos | undefined): { key: string; name: string } | null {
-  const yt = (videos?.results ?? []).filter((v) => v.site === "YouTube");
-  const pick =
-    yt.find((v) => v.type === "Trailer" && v.official) ||
-    yt.find((v) => v.type === "Trailer") ||
-    yt.find((v) => v.type === "Teaser") ||
-    yt[0];
-  return pick ? { key: pick.key, name: pick.name } : null;
-}
-
-async function fetchPage(page: number, query: string): Promise<{ items: YTItem[]; nextPage: number | null }> {
-  if (!TMDB_ENABLED) throw new Error("VITE_TMDB_API_KEY missing");
-
-  let movies: TmdbMovie[] = [];
-  let totalPages = 1;
-
-  if (query.trim().length >= 2) {
-    const data = await tmdbGet<{ results: TmdbMovie[]; total_pages: number }>("/search/movie", {
-      query: query.trim(),
-      page,
-      include_adult: "false",
-    });
-    movies = data.results ?? [];
-    totalPages = data.total_pages ?? 1;
-  } else {
-    const path = page % 2 === 1 ? "/movie/popular" : "/movie/now_playing";
-    const pageNum = Math.ceil(page / 2);
-    const data = await tmdbGet<{ results: TmdbMovie[]; total_pages: number }>(path, { page: pageNum });
-    movies = data.results ?? [];
-    totalPages = Math.max(data.total_pages ?? 1, 8);
-  }
-
-  const settled = await Promise.all(
-    movies.slice(0, 12).map(async (m) => {
-      try {
-        const detail = await tmdbGet<TmdbMovie & { videos?: TmdbVideos }>(`/movie/${m.id}`, {
-          append_to_response: "videos",
-        });
-        const trailer = pickTrailer(detail.videos);
-        if (!trailer) return null;
-        const title = m.title || m.name || "Untitled";
-        return {
-          id: trailer.key,
-          title: `${title} — ${trailer.name}`,
-          description: m.overview ?? "",
-          channel: "Official Trailer",
-          publishedAt: m.release_date ?? "",
-          thumbnail: tmdbPoster(m.poster_path, "w500"),
-        } satisfies YTItem;
-      } catch {
-        return null;
-      }
-    }),
-  );
-
-  const seen = new Set<string>();
-  const items = settled.filter((x): x is YTItem => {
-    if (!x || seen.has(x.id)) return false;
-    seen.add(x.id);
-    return true;
-  });
-
-  return { items, nextPage: page < totalPages ? page + 1 : null };
-}
-
 function useShortsFeed(query: string) {
   return useInfiniteQuery({
-    queryKey: ["tmdb-trailer-shorts", query],
-    queryFn: ({ pageParam }) => fetchPage(pageParam as number, query),
-    initialPageParam: 1,
-    getNextPageParam: (last) => last.nextPage ?? undefined,
-    staleTime: 5 * 60_000,
-    enabled: TMDB_ENABLED,
+    queryKey: ["yt-shorts-feed", query],
+    queryFn: async ({ pageParam }) => {
+      const u = new URL("/api/youtube", window.location.origin);
+      u.searchParams.set("type", "shorts");
+      if (query) u.searchParams.set("q", query);
+      if (pageParam) u.searchParams.set("pageToken", pageParam as string);
+      const r = await fetch(u.toString());
+      if (!r.ok) {
+        let detail = "shorts feed";
+        try {
+          const body = await r.json();
+          detail = body?.error ?? body?.detail ?? detail;
+        } catch {
+          /* */
+        }
+        throw new Error(String(detail));
+      }
+      return (await r.json()) as { items: YTItem[]; nextPageToken: string | null };
+    },
+    initialPageParam: "" as string,
+    getNextPageParam: (last) => last.nextPageToken ?? undefined,
+    staleTime: 30_000,
     retry: 1,
   });
 }
@@ -151,7 +78,7 @@ function ShortsPage() {
   const q = useShortsFeed(query);
 
   useEffect(() => {
-    const t = setTimeout(() => setQuery(input.trim()), 300);
+    const t = setTimeout(() => setQuery(input.trim()), 350);
     return () => clearTimeout(t);
   }, [input]);
 
@@ -162,40 +89,66 @@ function ShortsPage() {
     }
   }, [searchOpen]);
 
-  const items = useMemo(() => q.data?.pages.flatMap((p) => p.items) ?? [], [q.data]);
-  const errorMsg = !TMDB_ENABLED
-    ? "VITE_TMDB_API_KEY is missing on Vercel"
-    : q.error instanceof Error
+  const submitSearch = () => {
+    setQuery(input.trim());
+    inputRef.current?.blur();
+    setSearchOpen(false);
+  };
+
+  const items = useMemo(() => {
+    const seen = new Set<string>();
+    const out: YTItem[] = [];
+    for (const p of q.data?.pages ?? []) {
+      for (const it of p.items) {
+        if (seen.has(it.id)) continue;
+        seen.add(it.id);
+        out.push(it);
+      }
+    }
+    return out;
+  }, [q.data]);
+
+  const errorMsg =
+    q.error instanceof Error
       ? q.error.message
       : q.isError
-        ? "Failed to load trailers"
+        ? "Failed to load shorts"
         : null;
+  const needsKey =
+    !!errorMsg &&
+    (errorMsg.includes("YOUTUBE_API_KEY") || errorMsg.toLowerCase().includes("not configured"));
 
   return (
     <div className="fixed inset-0 z-40 bg-black text-foreground overflow-hidden">
-      {/* Top: logo + back LEFT · search icon RIGHT */}
       <div className="pointer-events-none absolute inset-x-0 top-0 z-50 flex items-start justify-between gap-2 p-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <Link
           to="/"
-          className="pointer-events-auto flex items-center gap-2 rounded-full bg-black/55 backdrop-blur-md pl-2.5 pr-3 py-1.5 border border-white/15 shadow-lg shadow-black/40"
+          className="pointer-events-auto flex items-center justify-center size-11 rounded-full bg-black/55 backdrop-blur-md border border-white/15 shadow-lg shadow-black/40"
           aria-label="Back to home"
         >
-          <ArrowLeft className="size-5 shrink-0 text-white" />
-          <Logo size={44} className="drop-shadow-[0_0_12px_rgba(0,200,83,0.55)]" />
+          <ArrowLeft className="size-5 text-white" />
         </Link>
 
         <div className="pointer-events-auto flex items-center">
           {searchOpen ? (
-            <div className="flex items-center gap-2 rounded-full bg-black/75 backdrop-blur-md border border-white/15 pl-3 pr-1.5 py-1.5 w-[min(70vw,280px)] shadow-lg">
+            <div className="flex items-center gap-2 rounded-full bg-black/75 backdrop-blur-md border border-white/15 pl-3 pr-1.5 py-1.5 w-[min(68vw,280px)] shadow-lg">
               <Search className="size-4 text-muted-foreground shrink-0" />
               <input
                 ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Search trailers…"
+                placeholder="Search YouTube…"
                 className="bg-transparent outline-none text-sm flex-1 min-w-0 placeholder:text-muted-foreground"
+                enterKeyHint="search"
                 onKeyDown={(e) => {
-                  if (e.key === "Escape") setSearchOpen(false);
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    submitSearch();
+                  }
+                  if (e.key === "Escape") {
+                    setSearchOpen(false);
+                    inputRef.current?.blur();
+                  }
                 }}
               />
               <button
@@ -206,6 +159,7 @@ function ShortsPage() {
                     setQuery("");
                   } else {
                     setSearchOpen(false);
+                    inputRef.current?.blur();
                   }
                 }}
                 className="size-8 rounded-full grid place-items-center hover:bg-white/10"
@@ -229,9 +183,20 @@ function ShortsPage() {
 
       {errorMsg && items.length === 0 && (
         <div className="absolute inset-0 z-30 grid place-items-center px-6 text-center">
-          <div className="space-y-2">
-            <p className="font-semibold">Could not load trailers</p>
-            <p className="text-sm text-muted-foreground">{errorMsg}</p>
+          <div className="max-w-sm space-y-3">
+            <p className="font-semibold">Shorts could not load</p>
+            <p className="text-sm text-muted-foreground">
+              {needsKey
+                ? "Set YOUTUBE_API_KEY on Vercel (Environment Variables), then redeploy."
+                : errorMsg}
+            </p>
+            <button
+              type="button"
+              onClick={() => q.refetch()}
+              className="rounded-full px-4 py-2 text-sm bg-primary text-primary-foreground"
+            >
+              Try again
+            </button>
           </div>
         </div>
       )}
@@ -262,7 +227,18 @@ function ShortsFeed({
 
   useEffect(() => {
     setActiveIndex(0);
+    scrollerRef.current?.scrollTo({ top: 0 });
   }, [items[0]?.id]);
+
+  const goToIndex = (next: number) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const node = el.querySelector<HTMLElement>(`[data-short][data-idx="${next}"]`);
+    if (node) {
+      node.scrollIntoView({ behavior: "smooth", block: "start" });
+      setActiveIndex(next);
+    }
+  };
 
   useEffect(() => {
     const el = scrollerRef.current;
@@ -299,16 +275,20 @@ function ShortsFeed({
       style={{ scrollbarWidth: "none" }}
     >
       {loading && items.length === 0 && (
-        <div className="h-[100dvh] grid place-items-center text-muted-foreground">Loading trailers…</div>
+        <div className="h-[100dvh] grid place-items-center text-muted-foreground">Loading shorts…</div>
       )}
       {items.map((it, i) => (
         <ShortItem
-          key={`\( {it.id}- \){i}`}
+          key={it.id}
           item={it}
           idx={i}
           active={i === activeIndex}
           muted={muted}
           onToggleMute={() => setMuted((v) => !v)}
+          onEnded={() => {
+            if (i + 1 < items.length) goToIndex(i + 1);
+            else onNearEndRef.current();
+          }}
         />
       ))}
       {items.length > 0 && (
@@ -326,12 +306,14 @@ function ShortItem({
   active,
   muted,
   onToggleMute,
+  onEnded,
 }: {
   item: YTItem;
   idx: number;
   active: boolean;
   muted: boolean;
   onToggleMute: () => void;
+  onEnded: () => void;
 }) {
   const [liked, setLiked] = useState(false);
   const [embedError, setEmbedError] = useState(false);
@@ -343,6 +325,8 @@ function ShortItem({
     unMute?: () => void;
     destroy?: () => void;
   } | null>(null);
+  const onEndedRef = useRef(onEnded);
+  onEndedRef.current = onEnded;
 
   useEffect(() => {
     if (!active) {
@@ -394,6 +378,10 @@ function ShortItem({
               /* */
             }
           },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          onStateChange: (e: any) => {
+            if (e.data === 0) onEndedRef.current();
+          },
           onError: () => setEmbedError(true),
         },
       });
@@ -433,9 +421,11 @@ function ShortItem({
         toast("Link copied");
       }
     } catch {
-      /* cancelled */
+      /* */
     }
   };
+
+  const title = item.title.replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"');
 
   return (
     <section
@@ -461,7 +451,7 @@ function ShortItem({
         <div className="absolute inset-0 z-[2] grid place-items-center bg-black/70 px-6 text-center">
           <div className="space-y-4 max-w-xs">
             <p className="text-sm text-muted-foreground">
-              YouTube blocked in-app playback for this trailer on your network.
+              YouTube blocked in-app playback for this video on your network.
             </p>
             <button
               type="button"
@@ -470,6 +460,13 @@ function ShortItem({
             >
               <ExternalLink className="size-4" />
               Watch on YouTube
+            </button>
+            <button
+              type="button"
+              onClick={onEnded}
+              className="block mx-auto text-sm text-muted-foreground underline"
+            >
+              Skip to next
             </button>
           </div>
         </div>
@@ -513,7 +510,7 @@ function ShortItem({
       <div className="absolute inset-x-0 bottom-0 z-20 p-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] bg-gradient-to-t from-black via-black/70 to-transparent pointer-events-none">
         <div className="min-w-0 pr-14">
           <div className="text-xs text-primary font-semibold truncate">@{item.channel}</div>
-          <h3 className="text-sm md:text-base font-semibold line-clamp-2">{item.title}</h3>
+          <h3 className="text-sm md:text-base font-semibold line-clamp-2">{title}</h3>
         </div>
       </div>
     </section>
