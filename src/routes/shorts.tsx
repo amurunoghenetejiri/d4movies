@@ -1,9 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AppShell } from "@/components/layout/AppShell";
-import { Search, Volume2, VolumeX, Heart, Share2 } from "lucide-react";
+import { Search, Volume2, VolumeX, Heart, Share2, ExternalLink, X, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { Logo } from "@/components/brand/Logo";
 import { TMDB_ENABLED, TMDB_KEY, tmdbPoster } from "@/lib/tmdb";
 
 export const Route = createFileRoute("/shorts")({
@@ -39,6 +39,23 @@ type TmdbMovie = {
 type TmdbVideos = {
   results: { key: string; site: string; type: string; official: boolean; name: string }[];
 };
+
+let ytReady: Promise<void> | null = null;
+function loadYT(): Promise<void> {
+  if (ytReady) return ytReady;
+  ytReady = new Promise((resolve) => {
+    if ((window as unknown as { YT?: { Player?: unknown } }).YT?.Player) {
+      resolve();
+      return;
+    }
+    const s = document.createElement("script");
+    s.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(s);
+    (window as unknown as { onYouTubeIframeAPIReady?: () => void }).onYouTubeIframeAPIReady = () =>
+      resolve();
+  });
+  return ytReady;
+}
 
 async function tmdbGet<T>(path: string, params: Record<string, string | number> = {}): Promise<T> {
   const url = new URL(`https://api.themoviedb.org/3${path}`);
@@ -127,14 +144,23 @@ function useShortsFeed(query: string) {
 }
 
 function ShortsPage() {
+  const [searchOpen, setSearchOpen] = useState(false);
   const [input, setInput] = useState("");
   const [query, setQuery] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
   const q = useShortsFeed(query);
 
   useEffect(() => {
     const t = setTimeout(() => setQuery(input.trim()), 300);
     return () => clearTimeout(t);
   }, [input]);
+
+  useEffect(() => {
+    if (searchOpen) {
+      const id = requestAnimationFrame(() => inputRef.current?.focus());
+      return () => cancelAnimationFrame(id);
+    }
+  }, [searchOpen]);
 
   const items = useMemo(() => q.data?.pages.flatMap((p) => p.items) ?? [], [q.data]);
   const errorMsg = !TMDB_ENABLED
@@ -146,21 +172,63 @@ function ShortsPage() {
         : null;
 
   return (
-    <AppShell>
-      <div className="fixed top-14 md:top-16 inset-x-0 z-30 px-3">
-        <div className="mx-auto max-w-md glass-strong rounded-full flex items-center gap-2 px-4 py-2">
-          <Search className="size-4 text-muted-foreground" />
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Search movie trailers…"
-            className="bg-transparent outline-none text-sm flex-1 placeholder:text-muted-foreground"
-          />
+    <div className="fixed inset-0 z-40 bg-black text-foreground overflow-hidden">
+      {/* Top: logo + back LEFT · search icon RIGHT */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-50 flex items-start justify-between gap-2 p-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
+        <Link
+          to="/"
+          className="pointer-events-auto flex items-center gap-2 rounded-full bg-black/55 backdrop-blur-md pl-2.5 pr-3 py-1.5 border border-white/15 shadow-lg shadow-black/40"
+          aria-label="Back to home"
+        >
+          <ArrowLeft className="size-5 shrink-0 text-white" />
+          <Logo size={44} className="drop-shadow-[0_0_12px_rgba(0,200,83,0.55)]" />
+        </Link>
+
+        <div className="pointer-events-auto flex items-center">
+          {searchOpen ? (
+            <div className="flex items-center gap-2 rounded-full bg-black/75 backdrop-blur-md border border-white/15 pl-3 pr-1.5 py-1.5 w-[min(70vw,280px)] shadow-lg">
+              <Search className="size-4 text-muted-foreground shrink-0" />
+              <input
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Search trailers…"
+                className="bg-transparent outline-none text-sm flex-1 min-w-0 placeholder:text-muted-foreground"
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") setSearchOpen(false);
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (input) {
+                    setInput("");
+                    setQuery("");
+                  } else {
+                    setSearchOpen(false);
+                  }
+                }}
+                className="size-8 rounded-full grid place-items-center hover:bg-white/10"
+                aria-label="Close search"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              className="size-11 rounded-full grid place-items-center bg-black/55 backdrop-blur-md border border-white/15 shadow-lg shadow-black/40 hover:bg-black/70"
+              aria-label="Search"
+            >
+              <Search className="size-5" />
+            </button>
+          )}
         </div>
       </div>
 
       {errorMsg && items.length === 0 && (
-        <div className="fixed inset-0 grid place-items-center px-6 text-center z-20">
+        <div className="absolute inset-0 z-30 grid place-items-center px-6 text-center">
           <div className="space-y-2">
             <p className="font-semibold">Could not load trailers</p>
             <p className="text-sm text-muted-foreground">{errorMsg}</p>
@@ -173,7 +241,7 @@ function ShortsPage() {
         onNearEnd={() => q.hasNextPage && !q.isFetchingNextPage && q.fetchNextPage()}
         loading={q.isLoading}
       />
-    </AppShell>
+    </div>
   );
 }
 
@@ -227,7 +295,7 @@ function ShortsFeed({
   return (
     <div
       ref={scrollerRef}
-      className="fixed inset-0 top-0 overflow-y-auto snap-y snap-mandatory"
+      className="h-[100dvh] w-full overflow-y-auto snap-y snap-mandatory"
       style={{ scrollbarWidth: "none" }}
     >
       {loading && items.length === 0 && (
@@ -244,7 +312,7 @@ function ShortsFeed({
         />
       ))}
       {items.length > 0 && (
-        <div className="h-24 grid place-items-center text-xs text-muted-foreground">
+        <div className="h-16 grid place-items-center text-xs text-muted-foreground">
           {loading ? "Loading more…" : "Swipe for more"}
         </div>
       )}
@@ -266,10 +334,95 @@ function ShortItem({
   onToggleMute: () => void;
 }) {
   const [liked, setLiked] = useState(false);
+  const [embedError, setEmbedError] = useState(false);
+  const mountRef = useRef<HTMLDivElement>(null);
+  const playerRef = useRef<{
+    playVideo?: () => void;
+    pauseVideo?: () => void;
+    mute?: () => void;
+    unMute?: () => void;
+    destroy?: () => void;
+  } | null>(null);
 
-  const src = active
-    ? `https://www.youtube.com/embed/\( {item.id}?autoplay=1&mute= \){muted ? 1 : 0}&controls=1&modestbranding=1&rel=0&playsinline=1&fs=1`
-    : "";
+  useEffect(() => {
+    if (!active) {
+      try {
+        playerRef.current?.destroy?.();
+      } catch {
+        /* */
+      }
+      playerRef.current = null;
+      return;
+    }
+
+    setEmbedError(false);
+    let disposed = false;
+
+    loadYT().then(() => {
+      if (disposed || !mountRef.current) return;
+      mountRef.current.innerHTML = "";
+      const host = document.createElement("div");
+      host.id = `yt-short-\( {item.id}- \){idx}`;
+      host.style.width = "100%";
+      host.style.height = "100%";
+      mountRef.current.appendChild(host);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const YT = (window as any).YT;
+      playerRef.current = new YT.Player(host, {
+        videoId: item.id,
+        width: "100%",
+        height: "100%",
+        playerVars: {
+          autoplay: 1,
+          mute: 1,
+          controls: 1,
+          modestbranding: 1,
+          rel: 0,
+          playsinline: 1,
+          fs: 1,
+          origin: typeof window !== "undefined" ? window.location.origin : undefined,
+        },
+        events: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          onReady: (e: any) => {
+            try {
+              e.target.playVideo?.();
+              if (muted) e.target.mute?.();
+              else e.target.unMute?.();
+            } catch {
+              /* */
+            }
+          },
+          onError: () => setEmbedError(true),
+        },
+      });
+    });
+
+    return () => {
+      disposed = true;
+      try {
+        playerRef.current?.destroy?.();
+      } catch {
+        /* */
+      }
+      playerRef.current = null;
+    };
+  }, [active, item.id, idx]);
+
+  useEffect(() => {
+    if (!active || !playerRef.current) return;
+    try {
+      if (muted) playerRef.current.mute?.();
+      else playerRef.current.unMute?.();
+    } catch {
+      /* */
+    }
+  }, [muted, active]);
+
+  const openOnYouTube = () => {
+    window.open(`https://www.youtube.com/watch?v=${item.id}`, "_blank", "noopener,noreferrer");
+  };
 
   const share = async () => {
     const url = `https://youtu.be/${item.id}`;
@@ -297,23 +450,36 @@ function ShortItem({
         loading={idx < 2 ? "eager" : "lazy"}
       />
 
-      {active && src && (
-        <iframe
-          key={`\( {item.id}- \){muted ? "m" : "u"}`}
-          src={src}
-          title={item.title}
-          className="absolute inset-0 h-full w-full z-[1]"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-          referrerPolicy="strict-origin-when-cross-origin"
+      {active && !embedError && (
+        <div
+          ref={mountRef}
+          className="absolute inset-0 z-[1] [&>div]:h-full [&>div]:w-full [&>iframe]:h-full [&>iframe]:w-full"
         />
       )}
 
-      <div className="absolute right-3 bottom-36 z-20 flex flex-col gap-3">
+      {active && embedError && (
+        <div className="absolute inset-0 z-[2] grid place-items-center bg-black/70 px-6 text-center">
+          <div className="space-y-4 max-w-xs">
+            <p className="text-sm text-muted-foreground">
+              YouTube blocked in-app playback for this trailer on your network.
+            </p>
+            <button
+              type="button"
+              onClick={openOnYouTube}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground"
+            >
+              <ExternalLink className="size-4" />
+              Watch on YouTube
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="absolute right-3 bottom-28 z-20 flex flex-col gap-3">
         <button
           type="button"
           onClick={() => setLiked((v) => !v)}
-          className={`size-11 rounded-full grid place-items-center glass ${liked ? "text-red-500" : "text-foreground"}`}
+          className={`size-11 rounded-full grid place-items-center bg-black/40 backdrop-blur border border-white/10 ${liked ? "text-red-500" : "text-foreground"}`}
           aria-label="Like"
         >
           <Heart className={`size-5 ${liked ? "fill-current" : ""}`} />
@@ -321,7 +487,7 @@ function ShortItem({
         <button
           type="button"
           onClick={onToggleMute}
-          className="size-11 rounded-full grid place-items-center glass"
+          className="size-11 rounded-full grid place-items-center bg-black/40 backdrop-blur border border-white/10"
           aria-label="Mute"
         >
           {muted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
@@ -329,14 +495,22 @@ function ShortItem({
         <button
           type="button"
           onClick={share}
-          className="size-11 rounded-full grid place-items-center glass"
+          className="size-11 rounded-full grid place-items-center bg-black/40 backdrop-blur border border-white/10"
           aria-label="Share"
         >
           <Share2 className="size-5" />
         </button>
+        <button
+          type="button"
+          onClick={openOnYouTube}
+          className="size-11 rounded-full grid place-items-center bg-black/40 backdrop-blur border border-white/10"
+          aria-label="Open on YouTube"
+        >
+          <ExternalLink className="size-5" />
+        </button>
       </div>
 
-      <div className="absolute inset-x-0 bottom-0 z-20 p-4 pb-28 md:pb-8 bg-gradient-to-t from-black via-black/70 to-transparent pointer-events-none">
+      <div className="absolute inset-x-0 bottom-0 z-20 p-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] bg-gradient-to-t from-black via-black/70 to-transparent pointer-events-none">
         <div className="min-w-0 pr-14">
           <div className="text-xs text-primary font-semibold truncate">@{item.channel}</div>
           <h3 className="text-sm md:text-base font-semibold line-clamp-2">{item.title}</h3>
