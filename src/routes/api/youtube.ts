@@ -1,5 +1,29 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+/** Movie-focused short queries — rotated randomly so the feed stays fresh and on-topic. */
+const MOVIE_SHORT_QUERIES = [
+  "movie trailer shorts",
+  "film trailer #shorts",
+  "movie clips #shorts",
+  "behind the scenes movie",
+  "movie scenes english",
+  "hollywood movie trailer",
+  "hollywood film trailer",
+  "movie facts #shorts",
+  "cinema trailer shorts",
+  "hollywood cartoon movie trailer",
+  "animated movie trailer shorts",
+  "hollywood movie scenes",
+  "hollywood film clips",
+  "movie premiere trailer",
+  "best movie trailers 2024 2025 2026",
+];
+
+function pickMovieQuery(): string {
+  const i = Math.floor(Math.random() * MOVIE_SHORT_QUERIES.length);
+  return MOVIE_SHORT_QUERIES[i] ?? "movie trailer shorts";
+}
+
 export const Route = createFileRoute("/api/youtube")({
   server: {
     handlers: {
@@ -24,10 +48,12 @@ export const Route = createFileRoute("/api/youtube")({
 
         if (type === "shorts") {
           yt.searchParams.set("videoDuration", "short");
-          yt.searchParams.set("q", q.trim() || "#shorts");
+          // Prefer explicit user search; otherwise use a random movie-related query
+          const searchQ = q.trim() || pickMovieQuery();
+          yt.searchParams.set("q", searchQ);
           yt.searchParams.set("order", q.trim() ? "relevance" : "date");
         } else {
-          yt.searchParams.set("q", q.trim() || "shorts");
+          yt.searchParams.set("q", q.trim() || "movie trailer");
           yt.searchParams.set("order", "relevance");
         }
         if (pageToken) yt.searchParams.set("pageToken", pageToken);
