@@ -8,7 +8,8 @@ export function HeroCarousel({ movies }: { movies: Movie[] }) {
   const [i, setI] = useState(0);
   useEffect(() => {
     if (!movies.length) return;
-    const t = setInterval(() => setI((v) => (v + 1) % movies.length), 6000);
+    // Rotate every 5s so posters keep changing and feel fresh
+    const t = setInterval(() => setI((v) => (v + 1) % movies.length), 5000);
     return () => clearInterval(t);
   }, [movies.length]);
   if (!movies.length) return null;
