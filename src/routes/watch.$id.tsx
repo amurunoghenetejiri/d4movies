@@ -4,7 +4,7 @@ import { useAllMovies, useMovieBySlug } from "@/lib/movies";
 import { useRecordProgress } from "@/lib/user-data";
 import { Button } from "@/components/ui/button";
 import {
-  ArrowLeft, Play, Pause, Volume2, VolumeX, Maximize, PictureInPicture,
+  ArrowLeft, Play, Pause, Volume2, VolumeX, Maximize, Minimize, PictureInPicture,
   SkipForward, SkipBack, Subtitles, Settings, Sun, Download,
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
@@ -45,6 +45,7 @@ function Watch() {
   const [zoom, setZoom] = useState(1);
   const [hint, setHint] = useState<string | null>(null);
   const [longPressActive, setLongPressActive] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -69,6 +70,13 @@ function Watch() {
     hideTimer.current = setTimeout(() => setShowUI(false), 3500);
   };
   useEffect(() => { bumpUI(); }, []);
+
+  // Track fullscreen state
+  useEffect(() => {
+    const onFs = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onFs);
+    return () => document.removeEventListener("fullscreenchange", onFs);
+  }, []);
 
   // Resume playback from saved history
   useEffect(() => {
@@ -109,12 +117,14 @@ function Watch() {
     );
   }
 
-  const related = all.filter((x) => x.id !== m.id).slice(0, 6);
+  const related = all.filter((x) => x.id !== m.id).slice(0, 8);
   const fmt = (s: number) => {
     const h = Math.floor(s / 3600);
     const mm = Math.floor((s % 3600) / 60);
     const ss = Math.floor(s % 60);
-    return `${h}:${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
+    return h > 0
+      ? `${h}:${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`
+      : `${mm}:${String(ss).padStart(2, "0")}`;
   };
   const dur = videoRef.current?.duration || m.runtimeMinutes * 60;
   const cur = videoRef.current?.currentTime || 0;
@@ -136,19 +146,41 @@ function Watch() {
     v.muted = !v.muted;
     setMuted(v.muted);
   };
+
   const goFullscreen = async () => {
     const el = containerRef.current;
     if (!el) return;
     try {
       if (document.fullscreenElement) {
         await document.exitFullscreen();
+        const so = screen.orientation as ScreenOrientation & { unlock?: () => void };
+        so?.unlock?.();
       } else {
-        await el.requestFullscreen?.();
-        const so = (screen.orientation as any);
-        if (so?.lock) { try { await so.lock("landscape"); } catch { /* not allowed */ } }
+        // Prefer video element fullscreen on mobile for better native controls + orientation
+        const v = videoRef.current as HTMLVideoElement & {
+          webkitEnterFullscreen?: () => void;
+          webkitRequestFullscreen?: () => Promise<void>;
+        };
+        if (v?.webkitEnterFullscreen) {
+          v.webkitEnterFullscreen();
+        } else if (el.requestFullscreen) {
+          await el.requestFullscreen();
+        }
+        // Lock to landscape when possible (phones)
+        const so = screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> };
+        if (so?.lock) {
+          try { await so.lock("landscape"); } catch { /* browser may block */ }
+        }
       }
-    } catch { /* ignore */ }
+    } catch {
+      // Fallback: try video fullscreen API
+      try {
+        const v = videoRef.current as any;
+        if (v?.requestFullscreen) await v.requestFullscreen();
+      } catch { /* ignore */ }
+    }
   };
+
   const togglePip = async () => {
     const v = videoRef.current as any;
     if (!v) return;
@@ -251,7 +283,6 @@ function Watch() {
     pinchRef.current = null;
   };
 
-  // Desktop long-press (mousedown hold)
   const onMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
     startLongPress();
@@ -260,11 +291,15 @@ function Watch() {
 
   return (
     <div className="min-h-screen bg-black" onMouseMove={bumpUI}>
-      {/* Sticky player: stays fixed while page below scrolls */}
+      {/* Player takes most of the viewport — especially on mobile */}
       <div className="sticky top-0 z-40 bg-black">
         <div
           ref={containerRef}
-          className="relative aspect-video max-h-[80vh] md:max-h-[85vh] w-full bg-black overflow-hidden select-none"
+          className={
+            isFullscreen
+              ? "relative w-screen h-screen bg-black overflow-hidden select-none"
+              : "relative aspect-video max-h-[92dvh] md:max-h-[88vh] w-full bg-black overflow-hidden select-none"
+          }
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
@@ -289,6 +324,7 @@ function Watch() {
                 setProgress((t.currentTime / (t.duration || 1)) * 100);
               }}
               onEnded={() => user && m && recordProgress.mutate({ movieDbId: m.dbId, progress: 100 })}
+              onDoubleClick={goFullscreen}
             >
               {m.subtitleUrl && <track kind="subtitles" src={m.subtitleUrl} srcLang="en" label="English" default />}
             </video>
@@ -303,54 +339,54 @@ function Watch() {
               </div>
             </>
           )}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/40 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/50 pointer-events-none" />
 
           {hint && (
-            <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-black/70 px-4 py-2 text-sm font-semibold text-foreground backdrop-blur-md animate-fade-in">
+            <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-black/75 px-5 py-2.5 text-sm font-semibold text-foreground backdrop-blur-md animate-fade-in shadow-xl">
               {hint}
             </div>
           )}
 
           {longPressActive && (
-            <div className="pointer-events-none absolute top-4 left-1/2 -translate-x-1/2 rounded-full bg-primary/90 px-3 py-1 text-xs font-bold text-primary-foreground shadow-lg">
+            <div className="pointer-events-none absolute top-4 left-1/2 -translate-x-1/2 rounded-full bg-primary/95 px-4 py-1.5 text-xs font-bold text-primary-foreground shadow-lg">
               2× SPEED
             </div>
           )}
 
-          <div className={`absolute inset-x-0 top-0 px-3 pt-1 pb-0 md:p-6 flex items-center justify-between transition-opacity duration-500 ${showUI ? "opacity-100" : "opacity-0"}`}>
+          <div className={`absolute inset-x-0 top-0 px-3 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2 md:p-6 flex items-center justify-between transition-opacity duration-500 ${showUI ? "opacity-100" : "opacity-0"}`}>
             <div className="flex items-center gap-2 md:gap-3 min-w-0">
-              <Button size="icon" variant="ghost" className="rounded-full shrink-0" onClick={() => nav({ to: "/movie/$id", params: { id: m.id } })} aria-label="Back"><ArrowLeft /></Button>
+              <Button size="icon" variant="ghost" className="rounded-full shrink-0 bg-black/40 backdrop-blur-sm" onClick={() => nav({ to: "/movie/$id", params: { id: m.id } })} aria-label="Back"><ArrowLeft /></Button>
               <div className="min-w-0">
                 <div className="text-[9px] md:text-sm text-muted-foreground">Now playing</div>
                 <div className="font-semibold text-sm md:text-base truncate">{m.title}</div>
               </div>
             </div>
-            <Logo size={65} />
+            <Logo size={56} />
           </div>
 
           {!playing && m.movieUrl && (
-            <button onClick={togglePlay} className="absolute inset-0 grid place-items-center">
-              <div className="grid place-items-center size-19 md:size-24 rounded-full bg-primary/95 text-primary-foreground glow-emerald">
-                <Play className="size-7 md:size-10 fill-current" />
+            <button onClick={togglePlay} className="absolute inset-0 grid place-items-center z-10">
+              <div className="grid place-items-center size-20 md:size-24 rounded-full bg-primary/95 text-primary-foreground glow-emerald shadow-2xl">
+                <Play className="size-8 md:size-10 fill-current ml-1" />
               </div>
             </button>
           )}
 
-          <div className={`absolute inset-x-0 bottom-0 px-2 pt-0 pb-0 md:p-6 transition-opacity duration-500 ${showUI ? "opacity-100" : "opacity-0"}`}>
-            <div className="flex items-center gap-2 text-[10px] md:text-xs mb-1 md:mb-2">
-              <span>{fmt(cur)}</span>
+          <div className={`absolute inset-x-0 bottom-0 px-2 pt-8 pb-[max(0.5rem,env(safe-area-inset-bottom))] md:p-6 transition-opacity duration-500 ${showUI ? "opacity-100" : "opacity-0"}`}>
+            <div className="flex items-center gap-2 text-[10px] md:text-xs mb-1.5 md:mb-2">
+              <span className="tabular-nums">{fmt(cur)}</span>
               <input
                 type="range" min={0} max={100} step={0.1} value={progress}
                 onChange={(e) => { const v = videoRef.current; if (!v) return; v.currentTime = ((+e.target.value) / 100) * (v.duration || 0); }}
-                className="flex-1 accent-primary"
+                className="flex-1 accent-primary h-1.5"
               />
-              <span>{fmt(dur)}</span>
+              <span className="tabular-nums">{fmt(dur)}</span>
             </div>
             <div className="flex flex-wrap items-center gap-0.5 md:gap-2">
-              <Button size="icon" variant="ghost" className="rounded-full size-8 md:size-10" onClick={() => seekBy(-10)}><SkipBack className="size-4" /></Button>
-              <Button size="icon" variant="ghost" className="rounded-full size-8 md:size-10" onClick={togglePlay}>{playing ? <Pause className="size-4" /> : <Play className="size-4" />}</Button>
-              <Button size="icon" variant="ghost" className="rounded-full size-8 md:size-10" onClick={() => seekBy(10)}><SkipForward className="size-4" /></Button>
-              <Button size="icon" variant="ghost" className="rounded-full size-8 md:size-10" onClick={toggleMute}>{muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}</Button>
+              <Button size="icon" variant="ghost" className="rounded-full size-9 md:size-10" onClick={() => seekBy(-10)}><SkipBack className="size-4" /></Button>
+              <Button size="icon" variant="ghost" className="rounded-full size-10 md:size-11" onClick={togglePlay}>{playing ? <Pause className="size-5" /> : <Play className="size-5" />}</Button>
+              <Button size="icon" variant="ghost" className="rounded-full size-9 md:size-10" onClick={() => seekBy(10)}><SkipForward className="size-4" /></Button>
+              <Button size="icon" variant="ghost" className="rounded-full size-9 md:size-10" onClick={toggleMute}>{muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}</Button>
               <input type="range" min={0} max={100} defaultValue={70}
                 onChange={(e) => { const v = videoRef.current; if (v) v.volume = (+e.target.value) / 100; }}
                 className="hidden md:block w-24 accent-primary" />
@@ -366,20 +402,19 @@ function Watch() {
                   className="rounded-full bg-white/10 text-[10px] md:text-xs px-2 py-1 border border-white/10">
                   {["Auto","4K","2K","1080p","720p"].map((q) => <option key={q} className="bg-background">{q}</option>)}
                 </select>
-                <Button size="icon" variant="ghost" className="rounded-full size-8 md:size-10 hidden sm:inline-flex" onClick={() => toast("Subtitles: English")}><Subtitles className="size-4" /></Button>
-                <Button size="icon" variant="ghost" className="rounded-full size-8 md:size-10 hidden sm:inline-flex" onClick={() => toast("Audio: English 5.1")}><Settings className="size-4" /></Button>
-                <Button size="icon" variant="ghost" className="rounded-full size-8 md:size-10" onClick={togglePip}><PictureInPicture className="size-4" /></Button>
-                <Button size="icon" variant="ghost" className="rounded-full size-8 md:size-10" onClick={goFullscreen}><Maximize className="size-4" /></Button>
+                <Button size="icon" variant="ghost" className="rounded-full size-9 md:size-10 hidden sm:inline-flex" onClick={() => toast("Subtitles: English")}><Subtitles className="size-4" /></Button>
+                <Button size="icon" variant="ghost" className="rounded-full size-9 md:size-10 hidden sm:inline-flex" onClick={() => toast("Audio: English 5.1")}><Settings className="size-4" /></Button>
+                <Button size="icon" variant="ghost" className="rounded-full size-9 md:size-10" onClick={togglePip}><PictureInPicture className="size-4" /></Button>
+                <Button size="icon" variant="ghost" className="rounded-full size-10 md:size-11 bg-primary/20" onClick={goFullscreen} aria-label="Fullscreen">
+                  {isFullscreen ? <Minimize className="size-5" /> : <Maximize className="size-5" />}
+                </Button>
               </div>
-            </div>
-            <div className="hidden">
-              Double-tap: ±10s • Hold: 2× speed • Swipe L/R: brightness/volume • Pinch: zoom
             </div>
           </div>
         </div>
       </div>
 
-      {/* Scrollable info below the fixed player */}
+      {/* Info + Up Next — all movies available once logged in */}
       <div className="mx-auto max-w-7xl px-4 md:px-6 py-8 md:py-10 grid md:grid-cols-[1fr_320px] gap-6 md:gap-8">
         <div>
           <div className="flex items-start justify-between gap-3">
@@ -418,8 +453,8 @@ function Watch() {
           )}
         </div>
         <aside>
-          <div className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Up Next</div>
-          <div className="space-y-3">
+          <div className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Up Next — All Movies</div>
+          <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-1">
             {related.map((r) => (
               <Link key={r.id} to="/watch/$id" params={{ id: r.id }} className="flex gap-3 glass rounded-xl p-2 hover-lift">
                 <img src={r.poster} alt="" className="w-16 h-24 md:w-20 md:h-28 object-cover rounded-lg" />
