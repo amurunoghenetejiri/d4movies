@@ -32,6 +32,16 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
+/** Shuffle array so hero posters feel fresh every visit. */
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 function Home() {
   const movies = useAllMovies();
   const { user } = useAuth();
@@ -82,7 +92,17 @@ function Home() {
     return out;
   }, [infinite.data]);
 
-  const heroSource = movies.filter((m) => m.featured).slice(0, 6);
+  // Dynamic hero: featured first, then newest uploads, shuffled so posters keep changing
+  const heroSource = useMemo(() => {
+    if (!movies.length) return [];
+    const featured = movies.filter((m) => m.featured);
+    const rest = movies.filter((m) => !m.featured);
+    // Prefer newest first within each group, then lightly shuffle for variety
+    const sortedRest = [...rest].sort((a, b) => (b.year || 0) - (a.year || 0));
+    const pool = [...featured, ...sortedRest].slice(0, 12);
+    return shuffle(pool).slice(0, 8);
+  }, [movies]);
+
   const continueWatching = (history.data ?? []).filter((h) => h.progress < 100).map((h) => h.movie);
 
   return (
