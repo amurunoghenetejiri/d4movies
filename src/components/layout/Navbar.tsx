@@ -24,7 +24,7 @@ export function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
   const nav = useNavigate();
-  const { user, profile, isAdmin, signOut } = useAuth();
+  const { user, profile, isAdmin, isModerator, signOut } = useAuth();
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -82,12 +82,10 @@ export function Navbar() {
           </nav>
 
           <div className="flex items-center gap-1 md:gap-2">
-            {/* Search */}
             <Button asChild variant="ghost" size="icon" className="rounded-full">
               <Link to="/search" aria-label="Search"><Search className="size-5" /></Link>
             </Button>
 
-            {/* Profile */}
             {user ? (
               <div className="relative" ref={menuRef}>
                 <button
@@ -113,7 +111,9 @@ export function Navbar() {
                     <MenuLink to="/history" icon={Clock}>History</MenuLink>
                     <MenuLink to="/downloads" icon={Download}>Downloads</MenuLink>
                     <MenuLink to="/settings" icon={SettingsIcon}>Settings</MenuLink>
+                    {isModerator && !isAdmin && <MenuLink to="/moderator" icon={Shield}>Moderator</MenuLink>}
                     {isAdmin && <MenuLink to="/admin" icon={Shield}>Admin</MenuLink>}
+                    {isAdmin && <MenuLink to="/moderator" icon={Shield}>Moderator</MenuLink>}
                     <div className="h-px bg-border my-1" />
                     <button
                       onClick={doSignOut}
@@ -130,7 +130,6 @@ export function Navbar() {
               </Button>
             )}
 
-            {/* Menu */}
             <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setOpen(true)} aria-label="Menu">
               <Menu className="size-5" />
             </Button>
@@ -163,6 +162,7 @@ export function Navbar() {
                 <Link to="/history" className="rounded-lg px-3 py-3 text-base hover:bg-white/5">History</Link>
                 <Link to="/downloads" className="rounded-lg px-3 py-3 text-base hover:bg-white/5">Downloads</Link>
                 <Link to="/settings" className="rounded-lg px-3 py-3 text-base hover:bg-white/5">Settings</Link>
+                {isModerator && <Link to="/moderator" className="rounded-lg px-3 py-3 text-base hover:bg-white/5">Moderator</Link>}
                 {isAdmin && <Link to="/admin" className="rounded-lg px-3 py-3 text-base hover:bg-white/5">Admin</Link>}
                 <Button className="mt-3 rounded-full" variant="destructive" onClick={doSignOut}>Sign out</Button>
               </>
@@ -231,7 +231,6 @@ function BottomItem({ to, label, icon: Icon, exact }: { to: any; label: string; 
     </Link>
   );
 }
-
 
 function MenuLink({ to, icon: Icon, children }: { to: any; icon: any; children: React.ReactNode }) {
   return (
